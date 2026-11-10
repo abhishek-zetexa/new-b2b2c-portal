@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --teal: #0fa892;
+  --teal-deep: #087f70;
+  --mint: #e4f6f2;
+  --mist: #f5faf9;
+  --navy: #344f70;
+  --white: #ffffff;
+  --page: var(--mist);
+  --surface: var(--white);
+  --ink: var(--navy);
+  --muted: color-mix(in srgb, var(--navy) 68%, var(--white));
+  --line: color-mix(in srgb, var(--navy) 12%, var(--white));
+  --primary: var(--teal);
+  --primary-hover: var(--teal-deep);
+  --on-primary: var(--white);
+  --stage: var(--teal);
+  --on-stage: var(--white);
+  --stage-soft: color-mix(in srgb, var(--white) 82%, transparent);
+  --stage-line: color-mix(in srgb, var(--white) 36%, transparent);
+  --stage-hover: var(--teal-deep);
+  --glow: var(--white);
+  --soft: var(--mist);
+  --shadow: 0 18px 40px color-mix(in srgb, var(--navy) 8%, transparent);
+  --header-h: 4.25rem;
+  --sidebar-w: 17.5rem;
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-navy: var(--navy);
+  --color-teal: var(--teal);
+  --color-soft: var(--soft);
+  --color-stage: var(--stage);
+  --color-on-stage: var(--on-stage);
+  --color-stage-soft: var(--stage-soft);
+  --color-stage-line: var(--stage-line);
+  --color-stage-hover: var(--stage-hover);
+  --color-glow: var(--glow);
+  --color-mint: var(--mint);
+  --color-mist: var(--mist);
+  --font-sans: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(900px 360px at 100% -8%, color-mix(in srgb, var(--mint) 80%, var(--white)), transparent 60%),
+    var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--teal) 28%, transparent);
+  color: var(--ink);
+}
+
+.field {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--page);
+  color: var(--ink);
+  padding: 0.9rem 1rem;
+  font: inherit;
+  outline: none;
+}
+
+.field::placeholder {
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.media-stage {
+  background: var(--stage);
+  color: var(--on-stage);
+}
+
+.stage-wash {
+  background-color: var(--teal-deep);
+  background-image: linear-gradient(145deg, var(--teal) 0%, color-mix(in srgb, var(--teal) 62%, var(--teal-deep)) 48%, var(--teal-deep) 100%);
+  color: var(--white);
+}
+
+.wave-loader {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: inherit;
+}
+
+.wave-loader span {
+  display: block;
+  border-radius: 999px;
+  background: currentColor;
+  animation: wave-dot 0.9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.wave-loader span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.wave-loader span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+.wave-loader-sm {
+  gap: 0.3rem;
+  height: 0.7rem;
+}
+
+.wave-loader-sm span {
+  width: 0.32rem;
+  height: 0.32rem;
+}
+
+.wave-loader-md {
+  gap: 0.4rem;
+  height: 1rem;
+}
+
+.wave-loader-md span {
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+.wave-loader-lg {
+  gap: 0.55rem;
+  height: 1.4rem;
+}
+
+.wave-loader-lg span {
+  width: 0.62rem;
+  height: 0.62rem;
+}
+
+@keyframes wave-dot {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) scale(0.72);
+    opacity: 0.35;
+  }
+
+  35% {
+    transform: translateY(-0.55rem) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-loader span {
+    animation: wave-dot-still 1.2s ease-in-out infinite;
+  }
+
+  @keyframes wave-dot-still {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
 }
