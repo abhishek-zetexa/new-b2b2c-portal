@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import { FiCheckCircle, FiInfo, FiPlus, FiSearch, FiShield, FiX } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Modal } from "@/components/ui/modal";
 import { FieldLabel, FieldMessage, SelectField, TextField } from "@/components/ui/form-field";
 import { WaveLoader } from "@/components/ui/wave-loader";
@@ -278,7 +279,9 @@ export function RolesPermissionsModal({
   async function handleSave() {
     if (!activeRole || busy) return;
     if (countPermissions(currentPermissions) === 0) {
-      setError("At least one permission must be selected.");
+      const message = "At least one permission must be selected.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -309,14 +312,18 @@ export function RolesPermissionsModal({
       };
 
       if (!response.ok || data.success === false) {
-        setError(data.message || "Failed to update role permissions.");
+        const message = data.message || "Failed to update role permissions.";
+        setError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
 
       onUpdated(data.message || "Agent role updated successfully");
     } catch {
-      setError("Cannot reach the role service. Try again in a moment.");
+      const message = "Cannot reach the role service. Try again in a moment.";
+      setError(message);
+      toast.error(message);
       setBusy(false);
     }
   }
@@ -490,6 +497,11 @@ export function CreateRoleModal({
 
     const trimmedName = name.trim();
     if (!trimmedName || flatPermissions.length === 0) {
+      toast.error(
+        !trimmedName
+          ? "Role name is required."
+          : "At least one permission must be selected.",
+      );
       return;
     }
 
@@ -519,14 +531,18 @@ export function CreateRoleModal({
       };
 
       if (!response.ok || data.success === false) {
-        setFormError(data.message || "Failed to create role.");
+        const message = data.message || "Failed to create role.";
+        setFormError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
 
       onCreated(trimmedName, data.message || "Role created successfully!");
     } catch {
-      setFormError("Cannot reach the role service. Try again in a moment.");
+      const message = "Cannot reach the role service. Try again in a moment.";
+      setFormError(message);
+      toast.error(message);
       setBusy(false);
     }
   }
@@ -724,14 +740,18 @@ export function AssignAgentRoleModal({
       };
 
       if (!response.ok || data.success === false) {
-        setError(data.message || "Failed to assign role.");
+        const message = data.message || "Failed to assign role.";
+        setError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
 
       onAssigned(data.message || "Agent role updated successfully");
     } catch {
-      setError("Cannot reach the role service. Try again in a moment.");
+      const message = "Cannot reach the role service. Try again in a moment.";
+      setError(message);
+      toast.error(message);
       setBusy(false);
     }
   }

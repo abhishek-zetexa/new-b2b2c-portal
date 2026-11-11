@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { toast } from "react-toastify";
 import { Modal } from "@/components/ui/modal";
 import { SelectField, TextField } from "@/components/ui/form-field";
 import { PhoneField } from "@/components/ui/phone-field";
@@ -93,7 +94,9 @@ export function AgentFormModal({
     const issues = validate();
     setErrors(issues);
     if (Object.values(issues).some(Boolean)) {
-      setFormError("Kindly fix the highlighted fields.");
+      const message = "Kindly fix the highlighted fields.";
+      setFormError(message);
+      toast.error(message);
       return;
     }
 
@@ -146,10 +149,11 @@ export function AgentFormModal({
         if (Object.keys(apiFieldErrors).length > 0) {
           setErrors((current) => ({ ...current, ...apiFieldErrors }));
         }
-        setFormError(
+        const message =
           data.message ||
-            (isEdit ? "Failed to update agent." : "Failed to create agent."),
-        );
+          (isEdit ? "Failed to update agent." : "Failed to create agent.");
+        setFormError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
@@ -159,7 +163,9 @@ export function AgentFormModal({
           (isEdit ? "Agent updated successfully" : "Agent created successfully"),
       );
     } catch {
-      setFormError("Cannot reach the agent service. Try again in a moment.");
+      const message = "Cannot reach the agent service. Try again in a moment.";
+      setFormError(message);
+      toast.error(message);
       setBusy(false);
     }
   }

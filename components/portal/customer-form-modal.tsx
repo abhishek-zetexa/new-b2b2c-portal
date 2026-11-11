@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FlagImage } from "react-international-phone";
+import { toast } from "react-toastify";
 import { Modal } from "@/components/ui/modal";
 import { Icon } from "@/components/ui/icon";
 import { FieldLabel, FieldMessage, TextField } from "@/components/ui/form-field";
@@ -296,7 +297,9 @@ export function CustomerFormModal({
     const issues = validate();
     setErrors(issues);
     if (Object.values(issues).some(Boolean)) {
-      setFormError("Kindly fill all the required fields.");
+      const message = "Kindly fill all the required fields.";
+      setFormError(message);
+      toast.error(message);
       return;
     }
 
@@ -347,10 +350,11 @@ export function CustomerFormModal({
         if (Object.keys(apiFieldErrors).length > 0) {
           setErrors((current) => ({ ...current, ...apiFieldErrors }));
         }
-        setFormError(
+        const message =
           data.message ||
-            (isEdit ? "Failed to update customer." : "Failed to add customer."),
-        );
+          (isEdit ? "Failed to update customer." : "Failed to add customer.");
+        setFormError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
@@ -360,7 +364,9 @@ export function CustomerFormModal({
           (isEdit ? "Customer updated successfully" : "Customer added successfully"),
       );
     } catch {
-      setFormError("Cannot reach the customer service. Try again in a moment.");
+      const message = "Cannot reach the customer service. Try again in a moment.";
+      setFormError(message);
+      toast.error(message);
       setBusy(false);
     }
   }

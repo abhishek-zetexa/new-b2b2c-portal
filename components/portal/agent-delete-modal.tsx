@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Modal } from "@/components/ui/modal";
 import { WaveLoader } from "@/components/ui/wave-loader";
 import type { AgentRecord } from "@/lib/agents";
@@ -46,14 +47,18 @@ export function AgentDeleteModal({
       };
 
       if (!response.ok || data.success === false) {
-        setError(data.message || "Failed to delete agent.");
+        const message = data.message || "Failed to delete agent.";
+        setError(message);
+        toast.error(message);
         setBusy(false);
         return;
       }
 
       onDeleted(data.message || "Agent deleted successfully");
     } catch {
-      setError("Cannot reach the agent service. Try again in a moment.");
+      const message = "Cannot reach the agent service. Try again in a moment.";
+      setError(message);
+      toast.error(message);
       setBusy(false);
     }
   }

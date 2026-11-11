@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { createPortal } from "react-dom";
 import { FlagImage } from "react-international-phone";
 import {
-  FiCheck,
   FiEdit2,
   FiGlobe,
   FiMail,
@@ -16,6 +15,7 @@ import {
   FiUsers,
   FiX,
 } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Pagination } from "@/components/ui/pagination";
 import { WaveLoader } from "@/components/ui/wave-loader";
 import { CustomerDeleteModal } from "@/components/portal/customer-delete-modal";
@@ -279,19 +279,12 @@ export function CustomerManagementView() {
   const [editingCustomer, setEditingCustomer] = useState<CustomerRecord | null>(null);
   const [formInstanceKey, setFormInstanceKey] = useState(0);
   const [deletingCustomer, setDeletingCustomer] = useState<CustomerRecord | null>(null);
-  const [toast, setToast] = useState("");
 
   const listAbortRef = useRef<AbortController | null>(null);
 
   const redirectToLogin = useCallback(() => {
     window.location.replace("/login");
   }, []);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(""), 4000);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
 
   // Debounce search input (300ms) and reset pagination back to page 1.
   useEffect(() => {
@@ -434,27 +427,6 @@ export function CustomerManagementView() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-      {toast ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed top-20 right-4 z-50 flex max-w-sm items-center gap-2.5 rounded-2xl border border-primary/25 bg-surface px-4 py-3 text-sm font-medium text-ink shadow-[0_18px_40px_color-mix(in_srgb,var(--navy)_16%,transparent)] sm:right-6"
-        >
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-mint text-primary">
-            <FiCheck className="h-3.5 w-3.5" aria-hidden="true" />
-          </span>
-          <span className="min-w-0 flex-1">{toast}</span>
-          <button
-            type="button"
-            aria-label="Dismiss message"
-            onClick={() => setToast("")}
-            className="cursor-pointer rounded-full p-1 text-muted hover:bg-soft hover:text-ink"
-          >
-            <FiX className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        </div>
-      ) : null}
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Customer Management
@@ -690,7 +662,7 @@ export function CustomerManagementView() {
           onUnauthorized={redirectToLogin}
           onSuccess={(message) => {
             setFormOpen(false);
-            setToast(message);
+            toast.success(message);
             if (!editingCustomer) {
               setPage(1);
             }
@@ -707,7 +679,7 @@ export function CustomerManagementView() {
         onDeleted={(message) => {
           const deletedLastOnPage = customers.length === 1 && page > 1;
           setDeletingCustomer(null);
-          setToast(message);
+          toast.success(message);
           if (deletedLastOnPage) {
             setPage((current) => Math.max(1, current - 1));
           } else {
