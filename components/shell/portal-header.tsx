@@ -39,8 +39,8 @@ export function PortalHeader({
         <Icon name="menu" className="h-[18px] w-[18px]" />
       </button>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold sm:text-base">{current.label}</p>
-        <p className="hidden text-xs text-muted sm:block">Partner portal</p>
+        {/* <p className="truncate text-sm font-semibold sm:text-base">{current.label}</p> */}
+        {/* <p className="hidden text-xs text-muted sm:block">Partner portal</p> */}
       </div>
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
         {status?.showEkyc ? (
@@ -65,8 +65,8 @@ export function PortalHeader({
             <span
               title={status.walletMessage || undefined}
               className={`inline-flex h-10 items-center whitespace-nowrap rounded-full px-3 text-xs font-semibold sm:px-4 sm:text-sm ${status.walletTone === "alert"
-                  ? "bg-danger text-white"
-                  : "bg-mint text-primary"
+                ? "bg-danger text-white"
+                : "bg-mint text-primary"
                 }`}
             >
               {status.walletLabel}

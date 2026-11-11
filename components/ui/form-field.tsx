@@ -59,6 +59,7 @@ type TextFieldProps = {
   autoComplete?: string;
   placeholder?: string;
   maxLength?: number;
+  disabled?: boolean;
   className?: string;
 };
 
@@ -82,6 +83,7 @@ export function TextField({
   autoComplete,
   placeholder,
   maxLength,
+  disabled,
   className = "",
 }: TextFieldProps) {
   const errorId = error ? `${id}-error` : undefined;
@@ -97,12 +99,13 @@ export function TextField({
         placeholder={fieldPlaceholder(label, placeholder)}
         maxLength={maxLength}
         value={value}
+        disabled={disabled}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={errorId}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
-        className={`field mt-2 ${className}`}
+        className={`field mt-2 ${disabled ? "cursor-not-allowed opacity-60" : ""} ${className}`}
       />
       <FieldMessage id={errorId}>{error}</FieldMessage>
     </div>
@@ -117,6 +120,7 @@ type SelectFieldProps = {
   onBlur?: () => void;
   error?: string;
   required?: boolean;
+  disabled?: boolean;
   children: ReactNode;
 } & Pick<SelectHTMLAttributes<HTMLSelectElement>, "autoComplete">;
 
@@ -128,6 +132,7 @@ export function SelectField({
   onBlur,
   error = "",
   required,
+  disabled,
   autoComplete,
   children,
 }: SelectFieldProps) {
@@ -140,6 +145,7 @@ export function SelectField({
           id={id}
           name={id}
           value={value}
+          disabled={disabled}
           data-empty={!value ? "true" : undefined}
           autoComplete={autoComplete}
           aria-required={required || undefined}
@@ -154,7 +160,9 @@ export function SelectField({
             lineHeight: 1.5,
             color: value ? undefined : "color-mix(in srgb, var(--ink) 45%, transparent)",
           }}
-          className="field appearance-none cursor-pointer [&_option]:bg-surface [&_option]:text-ink"
+          className={`field appearance-none [&_option]:bg-surface [&_option]:text-ink ${
+            disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+          }`}
         >
           {children}
         </select>

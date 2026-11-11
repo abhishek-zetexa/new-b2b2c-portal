@@ -107,3 +107,14 @@
 .phone-field[data-invalid="true"]:focus-within .react-international-phone-input-container {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 18%, transparent);
 }
+
+.phone-field[data-disabled="true"] {
+  opacity: 0.6;
+}
+
+.phone-field[data-disabled="true"] .react-international-phone-country-selector-button,
+.phone-field[data-disabled="true"] .react-international-phone-input {
+  cursor: not-allowed;
+  background-color: var(--page);
+  color: var(--ink);
+}

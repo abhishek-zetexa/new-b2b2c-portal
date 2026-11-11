@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   CountrySelector,
   FlagImage,
@@ -31,6 +31,8 @@ type PhoneFieldProps = {
   error?: string;
   required?: boolean;
   placeholder?: string;
+  countryIso2?: string;
+  disabled?: boolean;
 };
 
 export function PhoneField({
@@ -42,8 +44,11 @@ export function PhoneField({
   error = "",
   required,
   placeholder = "Enter phone number",
+  countryIso2,
+  disabled,
 }: PhoneFieldProps) {
   const errorId = error ? `${id}-error` : undefined;
+  const lastAppliedCountryRef = useRef<string>("");
 
   const handlePhoneChange = useCallback(
     (data: { phone: string; country: ParsedCountry }) => {
@@ -67,6 +72,15 @@ export function PhoneField({
     onChange: handlePhoneChange,
   });
 
+  useEffect(() => {
+    const normalized = countryIso2?.trim().toLowerCase() ?? "";
+    if (!normalized || normalized === lastAppliedCountryRef.current) return;
+    lastAppliedCountryRef.current = normalized;
+    if (!inputValue.replace(/\D/g, "")) {
+      setCountry(normalized as CountryIso2, { focusOnInput: false });
+    }
+  }, [countryIso2, inputValue, setCountry]);
+
   const handleCountrySelect = useCallback(
     (selected: ParsedCountry) => {
       setCountry(selected.iso2, { focusOnInput: true });
@@ -75,7 +89,11 @@ export function PhoneField({
   );
 
   return (
-    <div className="phone-field" data-invalid={error ? "true" : undefined}>
+    <div
+      className="phone-field"
+      data-invalid={error ? "true" : undefined}
+      data-disabled={disabled ? "true" : undefined}
+    >
       <FieldLabel htmlFor={id} required={required}>
         {label}
       </FieldLabel>
@@ -83,6 +101,7 @@ export function PhoneField({
         <CountrySelector
           selectedCountry={country.iso2}
           preferredCountries={preferredCountries}
+          disabled={disabled}
           onSelect={handleCountrySelect}
           renderButtonWrapper={({ rootProps }) => {
             const expanded = Boolean(rootProps["aria-expanded"]);
@@ -90,10 +109,11 @@ export function PhoneField({
               <button
                 {...rootProps}
                 type="button"
+                disabled={disabled || rootProps.disabled}
                 data-country={country.iso2}
                 className={`react-international-phone-country-selector-button${
                   expanded ? " react-international-phone-country-selector-button--active" : ""
-                }`}
+                }${disabled ? " react-international-phone-country-selector-button--disabled" : ""}`}
               >
                 <span className="react-international-phone-country-selector-button__button-content">
                   <FlagImage
@@ -121,11 +141,14 @@ export function PhoneField({
           type="tel"
           autoComplete="tel"
           value={inputValue}
+          disabled={disabled}
           placeholder={placeholder}
           aria-invalid={error ? true : undefined}
           aria-describedby={errorId}
           aria-required={required || undefined}
-          className="react-international-phone-input"
+          className={`react-international-phone-input${
+            disabled ? " react-international-phone-input--disabled" : ""
+          }`}
           onBlur={onBlur}
           onChange={handlePhoneValueChange}
         />
