@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* Fallbacks. THEME_* keys in .env override these from the document element. */
   --teal: #0fa892;
   --teal-deep: #087f70;
   --mint: #e4f6f2;
@@ -113,9 +114,34 @@ button[aria-busy="true"]:focus-visible {
   color: color-mix(in srgb, var(--ink) 45%, transparent);
 }
 
-.field:focus {
+select.field {
+  appearance: none;
+  padding-right: 2.75rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+select.field[data-empty="true"] {
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+select.field option {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+select.field option[value=""] {
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.field:focus,
+.field:focus-within {
   border-color: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.field:has(input[aria-invalid="true"]) {
+  border-color: var(--danger);
 }
 
 .field[aria-invalid="true"] {
@@ -204,7 +230,76 @@ button[aria-busy="true"]:focus-visible {
   }
 }
 
+.ekyc-dot {
+  position: relative;
+  display: inline-block;
+  height: 0.5rem;
+  width: 0.5rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--mint);
+  animation: ekyc-dot 1.35s ease-in-out infinite;
+}
+
+.ekyc-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--mint);
+  animation: ekyc-dot-ring 1.35s ease-out infinite;
+}
+
+@keyframes ekyc-dot {
+  0%,
+  100% {
+    transform: scale(0.65);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ekyc-dot-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.step-viewport {
+  overflow-x: clip;
+  overflow-y: visible;
+  transition: height 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.step-track {
+  display: flex;
+  width: 100%;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .step-viewport,
+  .step-track {
+    transition: none;
+  }
+
+  .ekyc-dot,
+  .ekyc-dot::after {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .wave-loader span {
     animation: wave-dot-still 1.2s ease-in-out infinite;
   }

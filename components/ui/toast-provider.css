@@ -1,0 +1,137 @@
+/* Align react-toastify (theme="colored") with the portal's runtime CSS theme tokens */
+.Toastify__toast-container.portal-toast-container {
+  --toastify-color-light: var(--surface, #ffffff);
+  --toastify-color-dark: var(--navy, #344f70);
+  --toastify-color-info: var(--navy, #344f70);
+  --toastify-color-success: var(--teal, #0fa892);
+  --toastify-color-warning: #d97706;
+  --toastify-color-error: var(--danger, #dc2626);
+  --toastify-text-color-light: var(--ink, #344f70);
+  --toastify-text-color-dark: var(--white, #ffffff);
+  --toastify-text-color-info: var(--white, #ffffff);
+  --toastify-text-color-success: var(--on-primary, #ffffff);
+  --toastify-text-color-warning: var(--white, #ffffff);
+  --toastify-text-color-error: #ffffff;
+  --toastify-color-transparent: rgba(255, 255, 255, 0.92);
+  --toastify-color-progress-bgo: 0.28;
+  --toastify-font-family: var(--font-sans);
+  --toastify-toast-bd-radius: 0.5rem;
+  --toastify-toast-min-height: 58px;
+  --toastify-toast-width: min(390px, calc(100vw - 24px));
+  --toastify-toast-shadow: 0 20px 44px -10px color-mix(in srgb, var(--navy) 34%, transparent);
+  --toastify-z-index: 9999;
+}
+
+.portal-toast-container .Toastify__toast.portal-toast {
+  padding-block: 14px 16px;
+  padding-inline-start: 16px;
+  padding-inline-end: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+/* Success: crisp portal teal theme look */
+.portal-toast-container .Toastify__toast-theme--colored.Toastify__toast--success {
+  background: linear-gradient(135deg,
+      var(--teal) 0%,
+      color-mix(in srgb, var(--teal) 56%, var(--teal-deep)) 55%,
+      var(--teal-deep) 100%);
+  box-shadow: 0 20px 44px -10px color-mix(in srgb, var(--teal-deep) 52%, transparent);
+}
+
+/* Info: portal navy gradient */
+.portal-toast-container .Toastify__toast-theme--colored.Toastify__toast--info {
+  background: linear-gradient(135deg,
+      var(--navy) 0%,
+      color-mix(in srgb, var(--navy) 70%, var(--teal-deep)) 100%);
+  box-shadow: 0 20px 44px -10px color-mix(in srgb, var(--navy) 45%, transparent);
+}
+
+/* Warning: warm amber highlight */
+.portal-toast-container .Toastify__toast-theme--colored.Toastify__toast--warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
+  border-color: rgba(254, 243, 199, 0.45);
+  box-shadow: 0 20px 44px -10px rgba(180, 83, 9, 0.48);
+}
+
+/* Error: unmistakable red highlight for instant user clarity */
+.portal-toast-container .Toastify__toast-theme--colored.Toastify__toast--error {
+  color: #ffffff;
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--danger, #dc2626) 84%, #ef4444) 0%,
+      var(--danger, #dc2626) 52%,
+      color-mix(in srgb, var(--danger, #dc2626) 72%, #7f1d1d) 100%);
+  border-color: rgba(254, 202, 202, 0.5);
+  box-shadow: 0 20px 44px -10px color-mix(in srgb, var(--danger, #dc2626) 58%, transparent);
+}
+
+.portal-toast-container .Toastify__toast-icon {
+  width: 2.125rem;
+  height: 2.125rem;
+  margin-inline-end: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.4rem;
+}
+
+.portal-toast-container .Toastify__toast--error .Toastify__toast-icon {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(254, 226, 226, 0.5);
+  box-shadow: 0 0 0 3px rgba(254, 202, 202, 0.16);
+}
+
+.portal-toast-container .Toastify__progress-bar-theme--colored.Toastify__progress-bar--error {
+  background: rgba(255, 241, 242, 0.94);
+}
+
+.portal-toast-container .Toastify__close-button {
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  opacity: 0.88;
+}
+
+.portal-toast-container .Toastify__toast--rtl .Toastify__close-button {
+  left: 10px;
+  right: unset;
+}
+
+.portal-toast-container .Toastify__close-button:hover,
+.portal-toast-container .Toastify__close-button:focus {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.portal-toast-container .Toastify__progress-bar--wrp {
+  height: 4px;
+}
+
+@media only screen and (max-width: 480px) {
+  .Toastify__toast-container.portal-toast-container {
+    width: 100vw;
+    padding: 0 12px max(14px, env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+  }
+
+  .portal-toast-container .Toastify__toast.portal-toast {
+    --toastify-toast-width: 100%;
+    margin-bottom: 0.5rem;
+    border-radius: var(--toastify-toast-bd-radius);
+  }
+}

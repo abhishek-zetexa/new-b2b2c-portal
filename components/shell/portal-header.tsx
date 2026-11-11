@@ -4,13 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { endSession } from "@/lib/auth-client";
+import type { AccountStatus } from "@/lib/account-status";
 import { findNavItem } from "@/lib/navigation";
 import { Icon } from "@/components/ui/icon";
 
 export function PortalHeader({
   onMenu,
+  status,
+  onVerify,
 }: {
   onMenu: () => void;
+  status: AccountStatus | null;
+  onVerify: () => void;
 }) {
   const pathname = usePathname();
   const current = findNavItem(pathname);
@@ -34,10 +39,45 @@ export function PortalHeader({
         <Icon name="menu" className="h-[18px] w-[18px]" />
       </button>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold sm:text-base">{current.label}</p>
-        <p className="hidden text-xs text-muted sm:block">Partner portal</p>
+        {/* <p className="truncate text-sm font-semibold sm:text-base">{current.label}</p> */}
+        {/* <p className="hidden text-xs text-muted sm:block">Partner portal</p> */}
       </div>
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        {status?.showEkyc ? (
+          <span className="group relative">
+            <button
+              type="button"
+              onClick={onVerify}
+              title={status.verifyBody}
+              className="inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-primary px-3 text-xs font-semibold text-on-primary hover:bg-primary-hover sm:px-4 sm:text-sm"
+            >
+              <span className="ekyc-dot" aria-hidden="true" />
+              <span className="hidden sm:inline">Complete eKYC Verification</span>
+              <span className="sm:hidden">eKYC</span>
+            </button>
+            <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+              {status.verifyBody}
+            </span>
+          </span>
+        ) : null}
+        {status?.walletLabel ? (
+          <span className="group relative">
+            <span
+              title={status.walletMessage || undefined}
+              className={`inline-flex h-10 items-center whitespace-nowrap rounded-full px-3 text-xs font-semibold sm:px-4 sm:text-sm ${status.walletTone === "alert"
+                ? "bg-danger text-white"
+                : "bg-mint text-primary"
+                }`}
+            >
+              {status.walletLabel}
+            </span>
+            {status.walletMessage ? (
+              <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+                {status.walletMessage}
+              </span>
+            ) : null}
+          </span>
+        ) : null}
         <Link
           href="/transactions"
           className="hidden h-10 items-center gap-2 rounded-full border border-line px-3 text-sm font-semibold sm:inline-flex"
