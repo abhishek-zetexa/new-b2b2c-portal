@@ -1,42 +1,25 @@
 "use client";
 
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { PortalHeader } from "@/components/shell/portal-header";
 import { Sidebar } from "@/components/shell/sidebar";
 
-type Session = { name: string; email: string };
-
-const fallback: Session = { name: "Partner", email: "Reseller admin" };
-
-const fallbackRaw = "";
-
-function readRaw() {
-  return sessionStorage.getItem("zetexa-preview-session") ?? fallbackRaw;
-}
-
-function parseSession(raw: string): Session {
-  if (!raw) return fallback;
-  try {
-    const parsed = JSON.parse(raw) as Partial<Session>;
-    return {
-      name: parsed.name || fallback.name,
-      email: parsed.email || fallback.email,
-    };
-  } catch {
-    return fallback;
-  }
-}
-
-export function PortalShell({ children }: { children: ReactNode }) {
+export function PortalShell({
+  children,
+  name,
+  email,
+}: {
+  children: ReactNode;
+  name: string;
+  email: string;
+}) {
   const [open, setOpen] = useState(false);
-  const raw = useSyncExternalStore(() => () => {}, readRaw, () => fallbackRaw);
-  const session = parseSession(raw);
 
   return (
     <div className="min-h-dvh bg-page">
       <Sidebar
-        name={session.name || "Partner"}
-        email={session.email || ""}
+        name={name || "Partner"}
+        email={email}
         mobileOpen={open}
         onNavigate={() => setOpen(false)}
       />
