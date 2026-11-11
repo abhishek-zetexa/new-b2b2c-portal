@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { endSession } from "@/lib/auth-client";
 import { findNavItem } from "@/lib/navigation";
 import { Icon } from "@/components/ui/icon";
 
@@ -11,12 +13,14 @@ export function PortalHeader({
   onMenu: () => void;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const current = findNavItem(pathname);
+  const [leaving, setLeaving] = useState(false);
 
-  function logout() {
-    sessionStorage.removeItem("zetexa-preview-session");
-    router.push("/login");
+  async function logout() {
+    if (leaving) return;
+    setLeaving(true);
+    const left = await endSession();
+    if (!left) setLeaving(false);
   }
 
   return (
@@ -59,7 +63,8 @@ export function PortalHeader({
           type="button"
           aria-label="Log out"
           onClick={logout}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line"
+          disabled={leaving}
+          className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-line disabled:cursor-wait"
         >
           <Icon name="logout" className="h-[18px] w-[18px]" />
         </button>

@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { authMessage, enterApp, postAuth } from "@/lib/auth-client";
+import { useSignedOutGate } from "@/components/auth/use-signed-out-gate";
+import { emailError, focusIssue, otpError } from "@/lib/field-rules";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { TextField, useShownFields } from "@/components/ui/form-field";
 import { Icon } from "@/components/ui/icon";
 import { WaveLoader } from "@/components/ui/wave-loader";
 
@@ -16,45 +19,67 @@ const points = [
 ];
 
 export function LoginScreen() {
-  const router = useRouter();
+  useSignedOutGate();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
   const [busy, setBusy] = useState(false);
+  const { show, message } = useShownFields();
 
-  function sendOtp(event: FormEvent) {
-    event.preventDefault();
+  async function sendOtp(event?: FormEvent) {
+    event?.preventDefault();
     if (busy) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Enter a valid email ID.");
+    show("email");
+    const normalized = email.trim().toLowerCase();
+    if (emailError(normalized)) {
+      focusIssue("email");
       return;
     }
-    setError("");
+    setBusy(true);
+    setServerError("");
+    const { ok, data } = await postAuth<{ message?: string }>("/api/auth/send-otp", {
+      email: normalized,
+      action: "login",
+    });
+    setBusy(false);
+    if (!ok) {
+      setServerError(authMessage(data, "Could not send the code. Try again."));
+      focusIssue("email");
+      return;
+    }
+    setEmail(normalized);
     setStep("otp");
   }
 
-  function verify(event: FormEvent) {
+  async function verify(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
-    if (otp.replace(/\D/g, "").length < 6) {
-      setError("Enter the 6-digit code.");
+    show("otp");
+    if (otpError(otp)) {
+      focusIssue("otp");
       return;
     }
-    setError("");
+    setServerError("");
     setBusy(true);
-    const name = email.split("@")[0]?.replace(/[._-]+/g, " ") || "Partner";
-    sessionStorage.setItem(
-      "zetexa-preview-session",
-      JSON.stringify({ email, name }),
-    );
-    router.push("/dashboard");
+    const { ok, data } = await postAuth<{ message?: string; user?: { dashboardEnabled?: boolean } }>("/api/auth/verify-otp", {
+      email,
+      otp,
+      action: "login",
+    });
+    setBusy(false);
+    if (!ok) {
+      setServerError(authMessage(data, "The code could not be verified."));
+      focusIssue("otp");
+      return;
+    }
+    enterApp(data.user?.dashboardEnabled);
   }
 
   return (
     <div className="min-h-dvh bg-page">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:py-12">
+      <main className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] lg:gap-16 lg:py-12">
         <section className="stage-wash bg-stage order-2 rounded-[1.75rem] p-6 text-on-stage sm:p-8 lg:order-1">
           <p className="text-xs font-semibold tracking-[0.16em] text-stage-soft uppercase">Partner login</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-on-stage sm:text-5xl">
@@ -92,25 +117,27 @@ export function LoginScreen() {
 
             {step === "email" ? (
               <form className="mt-6" onSubmit={sendOtp}>
-                <label htmlFor="email" className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">
-                  Email ID
-                </label>
-                <input
+                <TextField
                   id="email"
-                  type="email"
+                  label="Email ID"
                   required
-                  autoComplete="email"
+                  type="email"
                   inputMode="email"
-                  placeholder="Enter your email ID"
+                  autoComplete="email"
+                  placeholder="name@company.com"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="field mt-2"
+                  error={message("email", emailError(email)) || serverError}
+                  onBlur={() => show("email")}
+                  onChange={(value) => {
+                    setServerError("");
+                    setEmail(value);
+                  }}
                 />
-                {error ? <p className="mt-2 text-sm text-primary">{error}</p> : null}
                 <button
                   type="submit"
                   disabled={busy}
-                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-wait"
+                  aria-busy={busy}
+                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:text-on-primary"
                 >
                   {busy ? <WaveLoader size="sm" label="Sending code" /> : "Send OTP"}
                 </button>
@@ -120,44 +147,61 @@ export function LoginScreen() {
                 <p className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">Verification</p>
                 <h3 className="mt-2 text-xl font-semibold">OTP verification</h3>
                 <p className="mt-2 text-sm text-muted">
-                  Enter the 6-digit code for <span className="font-semibold text-ink">{email}</span>.
-                  Delivery to email connects with the partner API next. Any 6 digits opens the portal preview.
+                  Enter the 6-digit code sent to <span className="font-semibold text-ink">{email}</span>.
                 </p>
-                <input
+                <TextField
+                  id="otp"
+                  label="Verification code"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   maxLength={6}
-                  value={otp}
-                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="000000"
-                  aria-label="One time password"
-                  className="field mt-4 text-center text-lg tracking-[0.4em]"
+                  value={otp}
+                  error={message("otp", otpError(otp)) || serverError}
+                  onBlur={() => show("otp")}
+                  onChange={(value) => {
+                    setServerError("");
+                    setOtp(value.replace(/\D/g, "").slice(0, 6));
+                  }}
+                  className="text-center text-lg tracking-[0.4em]"
                 />
-                {error ? <p className="mt-2 text-sm text-primary">{error}</p> : null}
                 <button
                   type="submit"
                   disabled={busy}
-                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:cursor-wait"
+                  aria-busy={busy}
+                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:text-on-primary"
                 >
                   {busy ? <WaveLoader size="sm" label="Signing in" /> : "Verify and continue"}
                 </button>
-                <button
-                  type="button"
-                  className="mt-3 w-full text-sm font-semibold text-muted"
-                  onClick={() => {
-                    setStep("email");
-                    setOtp("");
-                    setError("");
-                  }}
-                >
-                  Use a different email
-                </button>
+                <p className="mt-3 text-center">
+                  <button
+                    type="button"
+                    className="inline cursor-pointer text-sm font-semibold text-muted hover:underline"
+                    onClick={() => {
+                      setStep("email");
+                      setOtp("");
+                      setServerError("");
+                    }}
+                  >
+                    Use a different email
+                  </button>
+                </p>
+                <p className="mt-2 text-center">
+                  <button
+                    type="button"
+                    className="inline cursor-pointer text-sm font-semibold text-primary hover:underline disabled:cursor-wait"
+                    disabled={busy}
+                    onClick={() => sendOtp()}
+                  >
+                    Resend code
+                  </button>
+                </p>
               </form>
             )}
 
             <p className="mt-5 text-center text-sm text-muted">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-semibold text-primary">
+              <Link href="/signup" className="inline cursor-pointer font-semibold text-primary hover:underline">
                 Sign up
               </Link>
             </p>

@@ -7,6 +7,7 @@
   --mist: #f5faf9;
   --navy: #344f70;
   --white: #ffffff;
+  --danger: #dc2626;
   --page: var(--mist);
   --surface: var(--white);
   --ink: var(--navy);
@@ -47,6 +48,7 @@
   --color-stage-hover: var(--stage-hover);
   --color-glow: var(--glow);
   --color-mint: var(--mint);
+  --color-danger: var(--danger);
   --color-mist: var(--mist);
   --font-sans: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
 }
@@ -75,6 +77,22 @@ input {
   -webkit-tap-highlight-color: transparent;
 }
 
+button:disabled,
+button[aria-busy="true"] {
+  appearance: none;
+  opacity: 1;
+  pointer-events: none;
+  cursor: wait;
+}
+
+button:disabled:focus,
+button:disabled:focus-visible,
+button[aria-busy="true"]:focus,
+button[aria-busy="true"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--teal) 28%, transparent);
   color: var(--ink);
@@ -98,6 +116,15 @@ input {
 .field:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field[aria-invalid="true"]:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 18%, transparent);
 }
 
 .media-stage {
