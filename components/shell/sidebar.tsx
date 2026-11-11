@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
+import { hasMenuFlag } from "@/lib/auth-session";
+import { usePartner } from "@/components/shell/partner-context";
 import { accountNav, portalNav, type NavItem } from "@/lib/navigation";
 import { Icon } from "@/components/ui/icon";
 
@@ -96,6 +98,18 @@ export function Sidebar({
   onNavigate: () => void;
 }) {
   const pathname = usePathname();
+  const partner = usePartner();
+  const visibleNav = portalNav
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (!partner.ready) return !item.flag && !item.agentHidden;
+        if (item.agentHidden && partner.role === "RESELLER_AGENT") return false;
+        if (item.flag) return hasMenuFlag(partner.featureAccess, item.flag);
+        return true;
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
   const initials = name
     .split(" ")
     .filter(Boolean)
@@ -141,7 +155,7 @@ export function Sidebar({
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-6">
-          {portalNav.map((group) => (
+          {visibleNav.map((group) => (
             <div key={group.label}>
               <p className="px-3 pb-2 text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
                 {group.label}

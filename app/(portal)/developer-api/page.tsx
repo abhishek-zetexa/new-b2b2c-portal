@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { DeveloperApiView } from "@/components/portal/developer-api/developer-api-view";
 
-export const metadata: Metadata = { title: "Developer APIs" };
+export const metadata: Metadata = {
+  title: "Developer APIs | Partner Portal",
+  description: "Reseller API access, keys, webhooks, and rate limits for integrating eSIM provisioning.",
+};
 
 export default function Page() {
-  return (
-    <SectionPage
-      eyebrow="Developer APIs"
-      title="Developer APIs"
-      description="Reseller API access for putting the catalogue inside your own app or booking flow."
-    />
-  );
+  return <DeveloperApiView />;
 }

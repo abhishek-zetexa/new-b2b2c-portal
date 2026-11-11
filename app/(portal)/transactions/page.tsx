@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { WalletView } from "@/components/wallet/wallet-view";
 
-export const metadata: Metadata = { title: "Wallet" };
+export const metadata: Metadata = {
+  title: "Wallet & Transactions - Partner Portal",
+};
 
-export default function Page() {
-  return (
-    <SectionPage
-      eyebrow="Wallet"
-      title="Wallet"
-      description="Recharge the prepaid wallet and follow every debit against an order."
-    />
-  );
+export default function TransactionsPage() {
+  return <WalletView />;
 }

@@ -1,14 +1,16 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { ReportsView } from "@/components/reports/reports-view";
+import { PageLoader } from "@/components/ui/wave-loader";
 
-export const metadata: Metadata = { title: "Reports" };
+export const metadata: Metadata = {
+  title: "Financial & Sales Reports - Partner Portal",
+};
 
-export default function Page() {
+export default function ReportsPage() {
   return (
-    <SectionPage
-      eyebrow="Reports"
-      title="Reports"
-      description="Revenue, margin, and usage by agent, product, and destination."
-    />
+    <Suspense fallback={<PageLoader />}>
+      <ReportsView />
+    </Suspense>
   );
 }
