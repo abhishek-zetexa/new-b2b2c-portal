@@ -33,6 +33,7 @@ export const publicEnv = {
   mvnoConfig: read("NEXT_PUBLIC_MVNO_CONFIG"),
   mvnoCust: read("NEXT_PUBLIC_MVNO_CUST"),
   chatwootUrl: read("NEXT_PUBLIC_CHATWOOT_URL"),
+  chatwootProdUrl: read("NEXT_PUBLIC_CHATWOOT_PROD_URL"),
   resellerBrandingPreference: read("NEXT_PUBLIC_RESELLER_BRANDING_PREFERENCE"),
   stripePublishableKey: read("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"),
   razorpayKey: read("NEXT_PUBLIC_RAZORPAY_KEY"),

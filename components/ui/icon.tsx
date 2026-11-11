@@ -49,6 +49,8 @@ const simplePaths: Record<string, string> = {
   "more-vertical": "M12 12h.01M12 6h.01M12 18h.01",
   "more-horizontal": "M12 12h.01M6 12h.01M18 12h.01",
   building: "M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1",
+  chat: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-4.5 3v-3H6.5A2.5 2.5 0 0 1 4 14.5z",
+  edit: "M12 20h9M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z",
   send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
   zap: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
 };

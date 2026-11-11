@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { authMessage, enterApp, postAuth } from "@/lib/auth-client";
 import { useSignedOutGate } from "@/components/auth/use-signed-out-gate";
-import { emailError, firstIssue, focusIssue, phoneError, requiredText, websiteError, otpError } from "@/lib/field-rules";
+import { emailError, firstIssue, focusIssue, nationalDigits, phoneError, requiredText, websiteError, otpError } from "@/lib/field-rules";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { CheckField, FieldMessage, SelectField, TextField, useShownFields } from "@/components/ui/form-field";
+import { PhoneField } from "@/components/ui/phone-field";
 import { Icon } from "@/components/ui/icon";
 import { WaveLoader } from "@/components/ui/wave-loader";
 
@@ -70,15 +71,6 @@ export function SignupScreen() {
     return () => controller.abort();
   }, []);
 
-  const dialCodes = useMemo(() => {
-    const seen = new Set<string>();
-    return countries.filter((country) => {
-      if (seen.has(country.dial_code)) return false;
-      seen.add(country.dial_code);
-      return true;
-    });
-  }, [countries]);
-
   function update<K extends keyof typeof empty>(key: K, value: (typeof empty)[K]) {
     setFormError("");
     setForm((current) => ({ ...current, [key]: value }));
@@ -87,11 +79,16 @@ export function SignupScreen() {
   function selectCountry(code: string) {
     const country = countries.find((item) => item.code === code);
     setFormError("");
-    setForm((current) => ({
-      ...current,
-      country: code,
-      dialCode: country?.dial_code ?? current.dialCode,
-    }));
+    setForm((current) => {
+      const dialCode = country?.dial_code ?? current.dialCode;
+      const national = nationalDigits(current.phone, current.dialCode);
+      return {
+        ...current,
+        country: code,
+        dialCode,
+        phone: dialCode ? `${dialCode}${national}` : current.phone,
+      };
+    });
   }
 
   function accountIssues() {
@@ -100,7 +97,7 @@ export function SignupScreen() {
       email: emailError(form.email),
       country: countriesError || requiredText(form.country, "Select the country where your business is based."),
       dialCode: requiredText(form.dialCode, "Select your country code."),
-      phone: phoneError(form.phone),
+      phone: phoneError(form.phone, form.dialCode),
     };
   }
 
@@ -144,7 +141,7 @@ export function SignupScreen() {
     const { ok, data } = await postAuth<{ message?: string }>("/api/auth/signup", {
       ...form,
       email: form.email.trim().toLowerCase(),
-      phone: form.phone.replace(/\D/g, ""),
+      phone: nationalDigits(form.phone, form.dialCode),
       interestedProducts: selectedProducts,
     });
     setBusy(false);
@@ -169,7 +166,7 @@ export function SignupScreen() {
     const { ok, data } = await postAuth<{ message?: string; user?: { dashboardEnabled?: boolean } }>("/api/auth/signup/complete", {
       ...form,
       email: form.email.trim().toLowerCase(),
-      phone: form.phone.replace(/\D/g, ""),
+      phone: nationalDigits(form.phone, form.dialCode),
       interestedProducts: selectedProducts,
       otp,
     });
@@ -294,35 +291,25 @@ export function SignupScreen() {
                   <option key={country.code} value={country.code}>{country.name}</option>
                 ))}
               </SelectField>
-              <div className="grid items-start gap-4 sm:grid-cols-[9rem_1fr]">
-                <SelectField
-                  id="dialCode"
-                  label="Code"
-                  required
-                  autoComplete="tel-country-code"
-                  value={form.dialCode}
-                  error={message("dialCode", requiredText(form.dialCode, "Select your country code."))}
-                  onBlur={() => show("dialCode")}
-                  onChange={(value) => update("dialCode", value)}
-                >
-                  <option value="">Code</option>
-                  {dialCodes.map((country) => (
-                    <option key={country.dial_code} value={country.dial_code}>{country.dial_code}</option>
-                  ))}
-                </SelectField>
-                <TextField
-                  id="phone"
-                  label="Mobile number"
-                  required
-                  inputMode="tel"
-                  autoComplete="tel-national"
-                  placeholder="9876543210"
-                  value={form.phone}
-                  error={message("phone", phoneError(form.phone))}
-                  onBlur={() => show("phone")}
-                  onChange={(value) => update("phone", value.replace(/[^\d\s-]/g, ""))}
-                />
-              </div>
+              <PhoneField
+                id="phone"
+                label="Mobile number"
+                required
+                value={form.phone}
+                error={
+                  message("dialCode", requiredText(form.dialCode, "Select your country code.")) ||
+                  message("phone", phoneError(form.phone, form.dialCode))
+                }
+                onBlur={() => show("phone", "dialCode")}
+                onChange={(next) => {
+                  setFormError("");
+                  setForm((current) => ({
+                    ...current,
+                    phone: next.international,
+                    dialCode: next.dialCode,
+                  }));
+                }}
+              />
               <button type="submit" className="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary hover:bg-primary-hover">
                 Continue
               </button>

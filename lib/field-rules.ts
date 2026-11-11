@@ -12,11 +12,23 @@ export function emailError(value: string) {
   return "";
 }
 
-export function phoneError(value: string) {
+export function nationalDigits(value: string, dialCode = "") {
   const digits = value.replace(/\D/g, "");
+  const code = dialCode.replace(/\D/g, "");
+  if (code && digits.startsWith(code)) return digits.slice(code.length);
+  return digits;
+}
+
+export function phoneError(value: string, dialCode = "") {
+  const digits = nationalDigits(value, dialCode);
   if (!digits) return "Enter your mobile number.";
   if (digits.length < 6 || digits.length > 15) return "Use 6 to 15 digits, without the country code.";
   return "";
+}
+
+export function optionalPhoneError(value: string, dialCode = "") {
+  if (!nationalDigits(value, dialCode)) return "";
+  return phoneError(value, dialCode);
 }
 
 export function websiteError(value: string) {
