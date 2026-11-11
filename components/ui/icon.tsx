@@ -23,6 +23,8 @@ const paths: Record<string, string> = {
   chevron: "M6 9l6 6 6-6",
   check: "M5 12.5l4.2 4.2L19 7.5",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  chat: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-4.5 3v-3H6.5A2.5 2.5 0 0 1 4 14.5z",
+  send: "M21 3L10 14M21 3l-6.5 18-4-7-7-4L21 3z",
 };
 
 export function Icon({

@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, SelectHTMLAttributes, useCallback, useId, useState } from "react";
+import { Icon } from "@/components/ui/icon";
 
 export function useShownFields() {
   const [shown, setShown] = useState<ReadonlySet<string>>(() => new Set());
@@ -61,6 +62,13 @@ type TextFieldProps = {
   className?: string;
 };
 
+function fieldPlaceholder(label: string, placeholder?: string) {
+  if (placeholder?.trim()) return placeholder;
+  const text = label.trim();
+  if (!text) return undefined;
+  return `Enter ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
+}
+
 export function TextField({
   id,
   label,
@@ -86,7 +94,7 @@ export function TextField({
         type={type}
         inputMode={inputMode}
         autoComplete={autoComplete}
-        placeholder={placeholder}
+        placeholder={fieldPlaceholder(label, placeholder)}
         maxLength={maxLength}
         value={value}
         aria-required={required || undefined}
@@ -127,20 +135,34 @@ export function SelectField({
   return (
     <div>
       <FieldLabel htmlFor={id} required={required}>{label}</FieldLabel>
-      <select
-        id={id}
-        name={id}
-        value={value}
-        autoComplete={autoComplete}
-        aria-required={required || undefined}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={errorId}
-        onBlur={onBlur}
-        onChange={(event) => onChange(event.target.value)}
-        className="field mt-2"
-      >
-        {children}
-      </select>
+      <div className="relative mt-2">
+        <select
+          id={id}
+          name={id}
+          value={value}
+          data-empty={!value ? "true" : undefined}
+          autoComplete={autoComplete}
+          aria-required={required || undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={errorId}
+          onBlur={onBlur}
+          onChange={(event) => onChange(event.target.value)}
+          style={{
+            WebkitAppearance: "none",
+            appearance: "none",
+            paddingRight: "2.75rem",
+            lineHeight: 1.5,
+            color: value ? undefined : "color-mix(in srgb, var(--ink) 45%, transparent)",
+          }}
+          className="field appearance-none cursor-pointer [&_option]:bg-surface [&_option]:text-ink"
+        >
+          {children}
+        </select>
+        <Icon
+          name="chevron"
+          className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-muted"
+        />
+      </div>
       <FieldMessage id={errorId}>{error}</FieldMessage>
     </div>
   );

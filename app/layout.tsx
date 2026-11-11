@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { FreshNavigation } from "@/components/auth/fresh-navigation";
+import { themeVars } from "@/lib/theme";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${poppins.variable} h-full`}
       data-scroll-behavior="smooth"
+      style={themeVars()}
     >
       <body className="min-h-full bg-page text-ink antialiased">
         <FreshNavigation />

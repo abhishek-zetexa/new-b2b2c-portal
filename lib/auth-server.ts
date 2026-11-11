@@ -116,3 +116,11 @@ export async function readAuthUser() {
   if (!session) return null;
   return parseAuthUser(jar.get(userCookie)?.value);
 }
+
+export async function readSessionTokens() {
+  const jar = await cookies();
+  const session = jar.get(sessionCookie)?.value;
+  const apiKey = jar.get(apiKeyCookie)?.value;
+  if (!session || !apiKey) return null;
+  return { session, apiKey };
+}
