@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
+import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { Icon } from "@/components/ui/icon";
 
 const links = [
@@ -29,6 +30,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <Link
             href="/login"
             className="hidden h-10 items-center rounded-full px-4 text-sm font-semibold text-ink sm:inline-flex"

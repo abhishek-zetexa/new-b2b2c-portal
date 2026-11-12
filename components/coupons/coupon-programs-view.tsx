@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { FiSearch } from "react-icons/fi";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SelectField, TextField } from "@/components/ui/form-field";
+import { Modal } from "@/components/ui/modal";
 import { Icon } from "@/components/ui/icon";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -469,28 +471,91 @@ function RegisterDialog({ open, programs, preset, onClose }: { open: boolean; pr
     }
   }
 
+  const close = () => {
+    if (!busy) onClose(Boolean(coupon));
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => onClose(Boolean(coupon))} className="max-w-2xl">
-      <DialogHeader><DialogTitle>Register Traveler & Create Coupon</DialogTitle></DialogHeader>
+    <Modal
+      open={open}
+      title="Register Traveler & Create Coupon"
+      onClose={close}
+      footer={
+        coupon ? (
+          <button
+            type="button"
+            onClick={() => onClose(true)}
+            className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-on-primary transition hover:bg-primary-hover"
+          >
+            Close
+          </button>
+        ) : (
+          <div className="flex w-full items-center justify-end gap-3">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={close}
+              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface px-5 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="register-traveler"
+              disabled={busy}
+              aria-busy={busy || undefined}
+              className="inline-flex h-11 min-w-28 cursor-pointer items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-wait"
+            >
+              {busy ? "Issuing..." : "Submit"}
+            </button>
+          </div>
+        )
+      }
+    >
       {coupon ? (
-        <div className="space-y-2 text-sm">
-          <p>Code: {text(coupon.coupon_code)} <button type="button" onClick={() => navigator.clipboard.writeText(text(coupon.coupon_code)).then(() => toast.success("Coupon Code copied to clipboard!"))}>Copy</button></p>
-          <p>{text(coupon.program_name)} · {text(coupon.discount_percent)}% · expires {text(coupon.expiry_date)}</p>
+        <div className="space-y-2 text-sm text-ink">
+          <p>
+            Code: {text(coupon.coupon_code)}{" "}
+            <button type="button" className="font-semibold text-primary" onClick={() => navigator.clipboard.writeText(text(coupon.coupon_code)).then(() => toast.success("Coupon Code copied to clipboard!"))}>
+              Copy
+            </button>
+          </p>
+          <p className="text-muted">{text(coupon.program_name)} · {text(coupon.discount_percent)}% · expires {text(coupon.expiry_date)}</p>
         </div>
       ) : (
-        <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
-          <select required value={form.program_id} onChange={(event) => setForm({ ...form, program_id: event.target.value })} className="h-10 rounded-2xl border border-line px-3 sm:col-span-2"><option value="">Program</option>{programs.map((item) => <option key={text(item.program_id)} value={text(item.program_id)}>{text(item.program_name)}</option>)}</select>
-          {(["first_name", "last_name", "email", "address", "city", "state", "postal_code", "passport_number"] as const).map((key) => (
-            <input key={key} required type={key === "email" ? "email" : "text"} minLength={key === "first_name" ? 2 : undefined} placeholder={key.replaceAll("_", " ")} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="h-10 rounded-2xl border border-line px-3" />
-          ))}
-          <label className="flex gap-2 sm:col-span-2">
-            <select value={form.dial} onChange={(event) => setForm({ ...form, dial: event.target.value })} className="h-10 rounded-2xl border border-line px-3"><option value="+91">India +91</option><option value="+44">United Kingdom +44</option><option value="+1">United States +1</option></select>
-            <input required placeholder="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="h-10 flex-1 rounded-2xl border border-line px-3" />
-          </label>
-          <button disabled={busy} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50 sm:col-span-2">{busy ? "Issuing..." : "Submit"}</button>
+        <form id="register-traveler" onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <SelectField
+              id="traveler-program"
+              label="Program"
+              required
+              disabled={busy}
+              value={form.program_id}
+              onChange={(program_id) => setForm({ ...form, program_id })}
+            >
+              <option value="">Select Program</option>
+              {programs.map((item) => (
+                <option key={text(item.program_id)} value={text(item.program_id)}>{text(item.program_name)}</option>
+              ))}
+            </SelectField>
+          </div>
+          <TextField id="traveler-first-name" label="First Name" required disabled={busy} value={form.first_name} placeholder="Enter First Name" onChange={(first_name) => setForm({ ...form, first_name })} />
+          <TextField id="traveler-last-name" label="Last Name" required disabled={busy} value={form.last_name} placeholder="Enter Last Name" onChange={(last_name) => setForm({ ...form, last_name })} />
+          <TextField id="traveler-email" label="Email Id" type="email" inputMode="email" required disabled={busy} value={form.email} placeholder="Enter Email" onChange={(email) => setForm({ ...form, email })} />
+          <TextField id="traveler-address" label="Address" required disabled={busy} value={form.address} placeholder="Enter Address" onChange={(address) => setForm({ ...form, address })} />
+          <TextField id="traveler-city" label="City" required disabled={busy} value={form.city} placeholder="Enter City" onChange={(city) => setForm({ ...form, city })} />
+          <TextField id="traveler-state" label="State" required disabled={busy} value={form.state} placeholder="Enter State" onChange={(state) => setForm({ ...form, state })} />
+          <TextField id="traveler-postal" label="Postal Code" required disabled={busy} value={form.postal_code} placeholder="Enter Postal Code" onChange={(postal_code) => setForm({ ...form, postal_code })} />
+          <TextField id="traveler-passport" label="Passport Number" required disabled={busy} value={form.passport_number} placeholder="Enter Passport Number" onChange={(passport_number) => setForm({ ...form, passport_number })} />
+          <SelectField id="traveler-dial" label="Country code" disabled={busy} value={form.dial} onChange={(dial) => setForm({ ...form, dial })}>
+            <option value="+91">India +91</option>
+            <option value="+44">United Kingdom +44</option>
+            <option value="+1">United States +1</option>
+          </SelectField>
+          <TextField id="traveler-phone" label="Phone" inputMode="tel" required disabled={busy} value={form.phone} placeholder="Enter phone" onChange={(phone) => setForm({ ...form, phone })} />
         </form>
       )}
-    </Dialog>
+    </Modal>
   );
 }
 

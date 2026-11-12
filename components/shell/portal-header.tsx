@@ -6,6 +6,7 @@ import { useState } from "react";
 import { endSession } from "@/lib/auth-client";
 import type { AccountStatus } from "@/lib/account-status";
 import { accountNav, findNavItem } from "@/lib/navigation";
+import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { Icon } from "@/components/ui/icon";
 
 export function PortalHeader({
@@ -59,7 +60,7 @@ export function PortalHeader({
               <span className="hidden sm:inline">Complete eKYC Verification</span>
               <span className="sm:hidden">eKYC</span>
             </button>
-            <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+            <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-surface px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
               {status.verifyBody}
             </span>
           </span>
@@ -76,7 +77,7 @@ export function PortalHeader({
               {status.walletLabel}
             </span>
             {status.walletMessage ? (
-              <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+              <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-surface px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
                 {status.walletMessage}
               </span>
             ) : null}
@@ -107,6 +108,7 @@ export function PortalHeader({
             </Link>
           );
         })}
+        <ThemeToggle />
         <button
           type="button"
           aria-label="Log out"

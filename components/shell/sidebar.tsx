@@ -155,7 +155,7 @@ export function Sidebar({
             {initials}
           </span>
           <span className="min-w-0">
-            <span className="notranslate block truncate text-sm font-semibold text-navy capitalize">{name}</span>
+            <span className="notranslate block truncate text-sm font-semibold text-ink capitalize">{name}</span>
             {status?.kycStatus ? (
               <span
                 className={`mt-0.5 flex items-center gap-1.5 text-xs font-semibold tracking-wide ${status.kycStatus === "REJECTED" ? "text-danger" : "text-primary"
@@ -169,7 +169,7 @@ export function Sidebar({
                 )}
               </span>
             ) : (
-              <span className="block truncate text-xs text-navy/70">{email || "Reseller admin"}</span>
+              <span className="block truncate text-xs text-muted">{email || "Reseller admin"}</span>
             )}
           </span>
         </div>
@@ -184,7 +184,7 @@ export function Sidebar({
                 onVerify();
                 onNavigate();
               }}
-              className="mt-4 inline-flex cursor-pointer rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-primary hover:text-primary"
+              className="mt-4 inline-flex cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink hover:border-primary hover:text-primary"
             >
               Verify now
             </button>
