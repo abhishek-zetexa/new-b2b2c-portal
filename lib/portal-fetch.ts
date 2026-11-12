@@ -19,6 +19,33 @@ export async function portalRequest<T>(url: string, init?: RequestInit): Promise
   return data as T;
 }
 
+export function errorText(payload: unknown) {
+  const record = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
+  if (!record) return "";
+  if (typeof record.error === "string" && record.error.trim()) return record.error.trim();
+  if (record.error && typeof record.error === "object") {
+    const nested = record.error as Record<string, unknown>;
+    if (typeof nested.message === "string" && nested.message.trim()) return nested.message.trim();
+    if (typeof nested.error === "string" && nested.error.trim()) return nested.error.trim();
+  }
+  if (typeof record.message === "string" && record.message.trim()) return record.message.trim();
+  return "";
+}
+
+export function requestErrorMessage(err: unknown, fallback: string) {
+  if (err instanceof PortalRequestError && err.status === 401) return "";
+  const message = err instanceof Error ? err.message.trim() : "";
+  if (
+    !message ||
+    message === "Request failed." ||
+    message === "The service request failed." ||
+    message === "Sign in required."
+  ) {
+    return fallback;
+  }
+  return message;
+}
+
 export function money(amount: number, currency: string) {
   const code = currency.trim().toUpperCase();
   if (/^[A-Z]{3}$/.test(code)) {

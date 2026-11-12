@@ -60,6 +60,7 @@ type TextFieldProps = {
   placeholder?: string;
   maxLength?: number;
   disabled?: boolean;
+  readOnly?: boolean;
   className?: string;
 };
 
@@ -84,6 +85,7 @@ export function TextField({
   placeholder,
   maxLength,
   disabled,
+  readOnly,
   className = "",
 }: TextFieldProps) {
   const errorId = error ? `${id}-error` : undefined;
@@ -96,16 +98,17 @@ export function TextField({
         type={type}
         inputMode={inputMode}
         autoComplete={autoComplete}
-        placeholder={fieldPlaceholder(label, placeholder)}
+        placeholder={readOnly ? undefined : fieldPlaceholder(label, placeholder)}
         maxLength={maxLength}
         value={value}
         disabled={disabled}
+        readOnly={readOnly}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={errorId}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
-        className={`field mt-2 ${disabled ? "cursor-not-allowed opacity-60" : ""} ${className}`}
+        className={`field mt-2 ${disabled ? "cursor-not-allowed opacity-60" : ""} ${readOnly ? "cursor-default bg-soft" : ""} ${className}`}
       />
       <FieldMessage id={errorId}>{error}</FieldMessage>
     </div>

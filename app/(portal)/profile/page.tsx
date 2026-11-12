@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { ProfileView } from "@/components/portal/profile/profile-view";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default function Page() {
-  return (
-    <SectionPage
-      eyebrow="Profile"
-      title="Profile"
-      description="Your partner profile, company details, and sign-in email."
-    />
-  );
+  return <ProfileView />;
 }

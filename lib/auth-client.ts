@@ -13,6 +13,11 @@ export async function endSession() {
   } catch {
     return false;
   }
+  try {
+    localStorage.clear();
+  } catch {
+    /* the timezone preference is stored here and should not block sign-out */
+  }
   window.location.replace("/login");
   return true;
 }
