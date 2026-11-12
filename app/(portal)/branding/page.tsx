@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { BrandingView } from "@/components/portal/branding/branding-view";
 
-export const metadata: Metadata = { title: "Branding & Preference" };
+export const metadata: Metadata = {
+  title: "Branding & Preference | Partner Portal",
+  description: "White-label customization, logos, email templates, theme colors, and support contacts.",
+};
 
 export default function Page() {
-  return (
-    <SectionPage
-      eyebrow="Branding"
-      title="Branding & Preference"
-      description="Add your logo, colours, and SMTP so customers see your brand."
-    />
-  );
+  return <BrandingView />;
 }

@@ -2,6 +2,8 @@ export type NavItem = {
   label: string;
   href: string;
   icon: string;
+  flag?: string;
+  agentHidden?: boolean;
   children?: { label: string; href: string }[];
 };
 
@@ -40,21 +42,24 @@ export const portalNav: NavGroup[] = [
   {
     label: "Finance",
     items: [
-      { label: "Wallet", href: "/transactions", icon: "wallet" },
-      { label: "Reports", href: "/reports", icon: "chart" },
+      { label: "Wallet", href: "/transactions", icon: "wallet", flag: "Wallet" },
+      { label: "Reports", href: "/reports", icon: "chart", flag: "Reports" },
       { label: "Coupon Programs", href: "/coupon-programs", icon: "tag" },
     ],
   },
   {
     label: "Platform",
     items: [
-      { label: "Developer APIs", href: "/developer-api", icon: "code" },
-      { label: "Branding & Preference", href: "/branding", icon: "palette" },
-      { label: "Help", href: "/help-menu", icon: "help" },
-      { label: "Installation Guide", href: "/installation-guide", icon: "book" },
+      { label: "Developer APIs", href: "/developer-api", icon: "code", flag: "DeveloperAPI" },
+      { label: "Branding & Preference", href: "/branding", icon: "palette", agentHidden: true },
+      { label: "Help", href: "/help-menu", icon: "help", flag: "HelpMenu" },
+      { label: "Installation Guide", href: "/installation-guide", icon: "book", flag: "InstallationGuide" },
     ],
   },
 ];
+
+export const financeNavGroup = portalNav.find((group) => group.label === "Finance")!;
+export const platformNavGroup = portalNav.find((group) => group.label === "Platform")!;
 
 export const accountNav: NavItem[] = [
   { label: "Settings", href: "/settings", icon: "settings" },

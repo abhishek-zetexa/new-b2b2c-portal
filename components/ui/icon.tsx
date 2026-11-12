@@ -1,4 +1,6 @@
-const paths: Record<string, string> = {
+import type { ReactNode } from "react";
+
+const simplePaths: Record<string, string> = {
   grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
   box: "M4 8l8-4 8 4-8 4-8-4zM4 8v8l8 4 8-4V8M12 12v8",
   sim: "M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM9 13h6v6H9z",
@@ -21,17 +23,237 @@ const paths: Record<string, string> = {
   menu: "M4 7h16M4 12h16M4 17h16",
   close: "M6 6l12 12M18 6L6 18",
   chevron: "M6 9l6 6 6-6",
+  "chevron-down": "M6 9l6 6 6-6",
+  "chevron-right": "M9 18l6-6-6-6",
   check: "M5 12.5l4.2 4.2L19 7.5",
   arrow: "M5 12h14M13 6l6 6-6 6",
-  chat: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-4.5 3v-3H6.5A2.5 2.5 0 0 1 4 14.5z",
-  send: "M21 3L10 14M21 3l-6.5 18-4-7-7-4L21 3z",
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35",
+  clock: "M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+  download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
+  undo: "M3 7v6h6M3 13a9 9 0 0 1 15.36-6.36A9 9 0 0 1 20.49 15",
+  trash: "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6",
+  phone: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+  mail: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6",
+  globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+  share: "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13",
+  wifi: "M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01",
+  "dollar-sign": "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
+  percent: "M19 5L5 19M6.5 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 20.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z",
+  "trending-up": "M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",
+  "trending-down": "M23 18l-9.5-9.5-5 5L1 6M17 18h6v-6",
+  filter: "M22 3H2l8 9.46V19l4 2v-8.54L22 3z",
+  printer: "M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z",
   plus: "M12 5v14M5 12h14",
+  "arrow-up-right": "M7 17L17 7M7 7h10v10",
+  "arrow-down-left": "M17 7L7 17M17 17H7V7",
+  "more-vertical": "M12 12h.01M12 6h.01M12 18h.01",
+  "more-horizontal": "M12 12h.01M6 12h.01M18 12h.01",
+  building: "M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1",
+  chat: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-4.5 3v-3H6.5A2.5 2.5 0 0 1 4 14.5z",
   edit: "M12 20h9M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z",
-  trash: "M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6",
-  mail: "M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM3 7l9 6 9-6",
-  phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
-  globe: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.6 9h16.8M3.6 15h16.8M12 3a13.5 13.5 0 0 0 0 18M12 3a13.5 13.5 0 0 1 0 18",
+  send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
+  zap: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+};
+
+const complexIcons: Record<string, () => ReactNode> = {
+  key: () => (
+    <>
+      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="M11.4 11.6L22 1l-2 4 2 2-2 2-4-4" />
+    </>
+  ),
+  copy: () => (
+    <>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </>
+  ),
+  refresh: () => (
+    <>
+      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16" />
+    </>
+  ),
+  "refresh-cw": () => (
+    <>
+      <path d="M21 2v6h-6M3 22v-6h6M2 12a10 10 0 0 1 18-5.3L21 8M22 12a10 10 0 0 1-18 5.3L3 16" />
+    </>
+  ),
+  "shield-check": () => (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </>
+  ),
+  "shield-alert": () => (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M12 8v4M12 16h.01" />
+    </>
+  ),
+  webhook: () => (
+    <>
+      <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c0-2.21 1.79-4 4-4h.3" />
+      <path d="M18 12a4 4 0 1 0-3.8 5.3" />
+      <circle cx="18" cy="6" r="3" />
+      <path d="m18 9-2.5 2.5" />
+    </>
+  ),
+  terminal: () => (
+    <>
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" y1="19" x2="20" y2="19" />
+    </>
+  ),
+  "external-link": () => (
+    <>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </>
+  ),
+  eye: () => (
+    <>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  "eye-off": () => (
+    <>
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20" />
+    </>
+  ),
+  "upload-cloud": () => (
+    <>
+      <path d="M16 16l-4-4-4 4M12 12v9" />
+      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+    </>
+  ),
+  "message-square": () => (
+    <>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </>
+  ),
+  "life-buoy": () => (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" />
+      <line x1="14.83" y1="14.83" x2="19.07" y2="19.07" />
+      <line x1="14.83" y1="9.17" x2="19.07" y2="4.93" />
+      <line x1="4.93" y1="19.07" x2="9.17" y2="14.83" />
+    </>
+  ),
+  activity: () => (
+    <>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </>
+  ),
+  "file-text": () => (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </>
+  ),
+  "thumbs-up": () => (
+    <>
+      <path d="M7 10v12M15 10.5V6a3 3 0 0 0-3-3l-4 7v12h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+    </>
+  ),
+  "thumbs-down": () => (
+    <>
+      <path d="M7 14V2M15 13.5V18a3 3 0 0 0 3 3l4-7V2H10.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM7 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+    </>
+  ),
+  smartphone: () => (
+    <>
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+      <line x1="12" y1="18" x2="12.01" y2="18" />
+    </>
+  ),
+  monitor: () => (
+    <>
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </>
+  ),
+  qrcode: () => (
+    <>
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <path d="M6 6h1v1H6zM17 6h1v1h-1zM6 17h1v1H6zM17 17h1v1h-1z" />
+    </>
+  ),
+  "play-circle": () => (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="10 8 16 12 10 16 10 8" />
+    </>
+  ),
+  "alert-triangle": () => (
+    <>
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </>
+  ),
+  "check-circle": () => (
+    <>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </>
+  ),
+  info: () => (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </>
+  ),
+  sparkles: () => (
+    <>
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+    </>
+  ),
+  apple: () => (
+    <>
+      <path d="M12 20.94c1.5 0 2.75-.81 4.19-.81 1.41 0 2.44.81 4 .81 1.94 0 3.81-1.44 4.81-3.69-3.88-1.94-3.25-7.38.69-9-1.06-2.5-3.62-3.88-5.88-3.88-1.75 0-3.19.88-4.12.88-.97 0-2.53-.88-4.31-.88C7.5 4.38 4 7.25 4 12.38c0 3.75 2.19 8.56 8 8.56z" />
+      <path d="M12 4.38C12.5 2.5 14.12 1 15.88 1c.19 1.88-1.38 3.56-3.88 3.38z" />
+    </>
+  ),
+  android: () => (
+    <>
+      <path d="M4 10h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8z" />
+      <path d="M7 6l-2-3M17 6l2-3M8 14h.01M16 14h.01" />
+    </>
+  ),
+  "credit-card": () => (
+    <>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+    </>
+  ),
+  calendar: () => (
+    <>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </>
+  ),
+  gift: () => (
+    <>
+      <polyline points="20 12 20 22 4 22 4 12" />
+      <rect x="2" y="7" width="20" height="5" />
+      <line x1="12" y1="22" x2="12" y2="7" />
+      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </>
+  ),
 };
 
 export function Icon({
@@ -41,18 +263,36 @@ export function Icon({
   name: string;
   className?: string;
 }) {
+  const complex = complexIcons[name];
+  if (complex) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {complex()}
+      </svg>
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 24 24"
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d={paths[name] ?? paths.grid} />
+      <path d={simplePaths[name] ?? simplePaths.grid} />
     </svg>
   );
 }

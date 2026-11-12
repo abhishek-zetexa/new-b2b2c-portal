@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { CouponProgramsView } from "@/components/coupons/coupon-programs-view";
 
-export const metadata: Metadata = { title: "Coupon Programs" };
+export const metadata: Metadata = {
+  title: "Coupon Programs - Partner Portal",
+};
 
-export default function Page() {
-  return (
-    <SectionPage
-      eyebrow="Coupons"
-      title="Coupon Programs"
-      description="Create partner coupons and decide which agents can issue them."
-    />
-  );
+export default function CouponProgramsPage() {
+  return <CouponProgramsView />;
 }

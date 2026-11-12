@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { publicEnv } from "@/lib/public-env";
 import {
   apiKeyCookie,
+  featureAccessFrom,
   parseAuthUser,
   sessionCookie,
   userCookie,
@@ -82,6 +83,10 @@ export function userFromAuthPayload(payload: unknown, fallbackEmail: string): { 
   const last = text(info?.reseller_last_name) || text(info?.last_name) || text(reseller?.reseller_last_name);
   const name = `${first} ${last}`.trim() || fallbackEmail.split("@")[0] || "Partner";
   const email = text(info?.email) || text(info?.reseller_email) || text(reseller?.email) || fallbackEmail;
+  const roles = record.roles_info && typeof record.roles_info === "object"
+    ? (record.roles_info as Record<string, unknown>)
+    : null;
+  const cashback = info?.is_cashback_eligible;
 
   return {
     sessionToken,
@@ -89,9 +94,13 @@ export function userFromAuthPayload(payload: unknown, fallbackEmail: string): { 
     user: {
       email,
       name,
+      firstName: text(info?.first_name) || first,
       resellerId: text(info?.reseller_id) || text(reseller?.reseller_id),
+      agentId: text(info?.agent_id),
       role: text(record.role),
       dashboardEnabled: info?.dashboard_enabled !== false,
+      cashbackEligible: cashback === true || cashback === "true",
+      featureAccess: featureAccessFrom(roles?.["role-access"]),
     },
   };
 }
@@ -101,6 +110,11 @@ export async function writeAuthCookies(user: AuthUser, sessionToken: string, api
   jar.set(sessionCookie, sessionToken, cookieOptions);
   jar.set(apiKeyCookie, apiKey, cookieOptions);
   jar.set(userCookie, JSON.stringify(user), cookieOptions);
+}
+
+export async function replaceApiKey(apiKey: string) {
+  const jar = await cookies();
+  jar.set(apiKeyCookie, apiKey, cookieOptions);
 }
 
 export async function clearAuthCookies() {
