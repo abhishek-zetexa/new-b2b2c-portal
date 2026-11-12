@@ -72,7 +72,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative flex max-h-[min(40rem,calc(100dvh-1.5rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-[0_24px_70px_color-mix(in_srgb,var(--navy)_22%,transparent)]"
+        className="relative flex max-h-[min(40rem,calc(100dvh-1.5rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-line bg-surface shadow-[0_24px_70px_color-mix(in_srgb,var(--navy)_22%,transparent)]"
       >
         <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4 sm:px-7">
           <h2 id={titleId} className="text-lg font-semibold text-ink">

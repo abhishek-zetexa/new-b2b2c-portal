@@ -36,8 +36,8 @@ function GuideCard({ index, guide }: { index: number; guide: Guide }) {
 
   return (
     <article className="grid min-w-0 overflow-hidden rounded-3xl bg-[#1c1c24] text-white shadow-[var(--shadow)] md:grid-cols-2">
-      <a href={guide.video} target="_blank" rel="noreferrer" className="relative block min-h-52 min-w-0 bg-black">
-        <img src={guide.thumbnail} alt="" className="h-56 w-full object-cover md:h-full" />
+      <a href={guide.video} target="_blank" rel="noreferrer" className="relative block min-w-0 bg-black md:min-h-52">
+        <img src={guide.thumbnail} alt="" className="aspect-[465/200] h-auto w-full object-contain md:absolute md:inset-0 md:aspect-auto md:h-full md:object-cover" />
         <span className="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-[#1c1c24] shadow-lg" aria-label="Play">
           <span className="ml-1 block h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-current" />
         </span>
@@ -45,8 +45,8 @@ function GuideCard({ index, guide }: { index: number; guide: Guide }) {
       <div className="flex min-w-0 flex-col justify-center gap-5 p-5 sm:p-7">
         <h2 className="text-xl font-semibold leading-7">{index + 1}. {guide.title}</h2>
         {pdf ? (
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3">
-            <span className="text-sm">{pdfName}</span>
+          <div className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3">
+            <span className="min-w-0 text-sm leading-5">{pdfName}</span>
             <a href={pdf} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-semibold text-white/80">Open</a>
           </div>
         ) : null}

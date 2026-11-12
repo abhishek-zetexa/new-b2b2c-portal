@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { endSession } from "@/lib/auth-client";
 import type { AccountStatus } from "@/lib/account-status";
-import { findNavItem } from "@/lib/navigation";
+import { accountNav, findNavItem } from "@/lib/navigation";
+import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { Icon } from "@/components/ui/icon";
 
 export function PortalHeader({
@@ -19,6 +20,7 @@ export function PortalHeader({
 }) {
   const pathname = usePathname();
   const current = findNavItem(pathname);
+  const accountCrumb = accountNav.some((item) => item.href === pathname);
   const [leaving, setLeaving] = useState(false);
 
   async function logout() {
@@ -39,8 +41,11 @@ export function PortalHeader({
         <Icon name="menu" className="h-[18px] w-[18px]" />
       </button>
       <div className="min-w-0">
-        {/* <p className="truncate text-sm font-semibold sm:text-base">{current.label}</p> */}
-        {/* <p className="hidden text-xs text-muted sm:block">Partner portal</p> */}
+        {accountCrumb ? (
+          <nav aria-label="Breadcrumb">
+            <p className="truncate text-sm font-semibold text-ink sm:text-base">{current.label}</p>
+          </nav>
+        ) : null}
       </div>
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
         {status?.showEkyc ? (
@@ -55,7 +60,7 @@ export function PortalHeader({
               <span className="hidden sm:inline">Complete eKYC Verification</span>
               <span className="sm:hidden">eKYC</span>
             </button>
-            <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+            <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-surface px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
               {status.verifyBody}
             </span>
           </span>
@@ -72,7 +77,7 @@ export function PortalHeader({
               {status.walletLabel}
             </span>
             {status.walletMessage ? (
-              <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-white px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
+              <span className="pointer-events-none absolute top-full right-0 z-20 mt-2 hidden w-64 rounded-2xl border border-line bg-surface px-3 py-2 text-xs leading-5 text-ink shadow group-hover:block">
                 {status.walletMessage}
               </span>
             ) : null}
@@ -85,20 +90,25 @@ export function PortalHeader({
           <Icon name="wallet" className="h-4 w-4 text-primary" />
           Wallet
         </Link>
-        <Link
-          href="/settings"
-          aria-label="Settings"
-          className="hidden h-10 w-10 items-center justify-center rounded-full border border-line sm:inline-flex"
-        >
-          <Icon name="settings" className="h-[18px] w-[18px]" />
-        </Link>
-        <Link
-          href="/profile"
-          aria-label="Profile"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line"
-        >
-          <Icon name="person" className="h-[18px] w-[18px]" />
-        </Link>
+        {accountNav.map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-label={item.label}
+              title={item.label}
+              aria-current={active ? "page" : undefined}
+              className={`hidden h-10 items-center justify-center gap-2 rounded-full border px-3 text-sm font-semibold lg:inline-flex ${
+                active ? "border-primary bg-mint text-primary" : "border-line"
+              }`}
+            >
+              <Icon name={item.icon} className="h-[18px] w-[18px]" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        <ThemeToggle />
         <button
           type="button"
           aria-label="Log out"

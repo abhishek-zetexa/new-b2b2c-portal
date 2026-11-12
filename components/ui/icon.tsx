@@ -53,6 +53,8 @@ const simplePaths: Record<string, string> = {
   edit: "M12 20h9M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z",
   send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
   zap: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+  moon: "M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z",
+  sun: "M12 4V2M12 22v-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4 12H2M22 12h-2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
 };
 
 const complexIcons: Record<string, () => ReactNode> = {

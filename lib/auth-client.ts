@@ -13,6 +13,13 @@ export async function endSession() {
   } catch {
     return false;
   }
+  try {
+    const theme = localStorage.getItem("portal-theme");
+    localStorage.clear();
+    if (theme === "dark" || theme === "light") localStorage.setItem("portal-theme", theme);
+  } catch {
+    /* the timezone preference is stored here and should not block sign-out */
+  }
   window.location.replace("/login");
   return true;
 }

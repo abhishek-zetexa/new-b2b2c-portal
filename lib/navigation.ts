@@ -67,6 +67,8 @@ export const accountNav: NavItem[] = [
 ];
 
 export function findNavItem(pathname: string) {
+  const account = accountNav.find((item) => item.href === pathname);
+  if (account) return account;
   const items = portalNav.flatMap((group) => group.items);
   const child = items
     .flatMap((item) => item.children ?? [])
