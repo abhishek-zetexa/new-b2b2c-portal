@@ -1,0 +1,21 @@
+---
+description: Visual system for Finance and Platform pages, matching Customer, Agent, and SIM Inventory
+globs: components/{wallet,reports,coupons,portal}/**/*.tsx
+alwaysApply: false
+---
+
+# Portal page UI
+
+Customer Management, Agent Management, and SIM Inventory are the visual source. Wallet, Reports, Coupon Programs, Developer APIs, Branding, Help, and Installation Guide use the same chrome.
+
+- Page shell: `mx-auto max-w-6xl space-y-5`. Title: `text-2xl font-semibold tracking-tight text-ink sm:text-3xl`.
+- Primary action: `h-11 rounded-full bg-primary px-5 text-sm font-semibold text-on-primary hover:bg-primary-hover`.
+- Secondary action: `h-11 rounded-full border border-line bg-surface px-5 text-sm font-semibold text-ink hover:border-primary hover:text-primary`.
+- Section: `overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow)]`.
+- Tabs: the shared `Tabs` pills (`bg-mint text-primary` when selected). Do not invent a second tab style.
+- Table head: `border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase`. Rows: `divide-y divide-line` and `hover:bg-soft/65`. Below `md`, use stacked cards.
+- Status: `StatusPill` (mint for success, `bg-danger/10 text-danger` for pending/failed/revoked).
+- Page lists use `Pagination`. Search fields use `h-10 rounded-2xl border-line bg-page` with the primary focus ring.
+- Field errors: `text-xs font-medium text-danger`. Form alerts: `rounded-2xl border border-danger/25 bg-danger/5 text-danger`.
+- Toasts: `react-toastify` (`toast.success` / `toast.error`), the same as Customer and Agent pages.
+- Empty and error states sit centered in the card, with a mint or danger icon tile, a short title, muted detail, and a pill button (`Try again`, `Clear search`).

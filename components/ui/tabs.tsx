@@ -41,7 +41,7 @@ export function TabsList({
   return (
     <div
       role="tablist"
-      className={`inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl border border-line bg-mist p-1 text-muted ${className}`}
+      className={`inline-flex max-w-full flex-wrap items-center gap-2 ${className}`}
     >
       {children}
     </div>
@@ -68,10 +68,10 @@ export function TabsTrigger({
       role="tab"
       aria-selected={isSelected}
       onClick={() => ctx.onValueChange(value)}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all ${
+      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:text-sm ${
         isSelected
-          ? "bg-surface font-semibold text-primary shadow-xs"
-          : "text-muted hover:text-ink hover:bg-surface/50"
+          ? "bg-mint text-primary"
+          : "border border-line bg-page text-muted hover:border-primary/45 hover:bg-mint/60 hover:text-primary"
       } ${className}`}
     >
       {children}

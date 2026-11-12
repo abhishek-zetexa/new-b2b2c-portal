@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePartner } from "@/components/shell/partner-context";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/toast";
+import { Pagination } from "@/components/ui/pagination";
+import { toast } from "react-toastify";
 import { asList, asRecord, num, portalRequest, text, type JsonRecord } from "@/lib/portal-fetch";
 
 const platforms = [
@@ -21,6 +21,10 @@ const ancillaryCards = [
   ["Business Lounge", "BusinessLounge"],
   ["Fast Track", "FastTrack"],
 ] as const;
+
+function CountChip({ value }: { value: number }) {
+  return <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-primary tabular-nums">{value}</span>;
+}
 
 function iso(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -128,8 +132,8 @@ export function ReportsView() {
   const visibleAgents = agents.filter((agent) => text(agent.email).toLowerCase().includes(agentQuery.toLowerCase()));
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight">Reports</h1>
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Reports</h1>
       <div className="grid gap-3 rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow)] sm:p-5 md:grid-cols-2 xl:grid-cols-4">
         <input type="date" max={iso(new Date())} value={from} onChange={(event) => setFrom(event.target.value)} className="field" />
         <input type="date" max={iso(new Date())} value={to} onChange={(event) => setTo(event.target.value)} className="field" />
@@ -153,16 +157,16 @@ export function ReportsView() {
           </>
         ) : null}
         <div className="flex flex-wrap gap-2 md:col-span-2 xl:col-span-4">
-          <button type="button" disabled={loading} onClick={submit} className="h-11 rounded-2xl bg-primary px-5 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Loading..." : "Submit"}</button>
-          <button type="button" onClick={() => exportWorkbook({ from, to, esim, ancillary, localSim, fetchBase: () => fetchReports(baseBody()) })} className="h-11 rounded-2xl border border-line bg-surface px-5 text-sm font-semibold">Export</button>
+          <button type="button" disabled={loading} onClick={submit} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50">{loading ? "Loading..." : "Submit"}</button>
+          <button type="button" onClick={() => exportWorkbook({ from, to, esim, ancillary, localSim, fetchBase: () => fetchReports(baseBody()) })} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface px-5 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary">Export</button>
         </div>
       </div>
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
         <TabsList>
-          <TabsTrigger value="esim">eSIM {esim.length > 0 ? <Badge variant="mint">{esim.length}</Badge> : null}</TabsTrigger>
-          <TabsTrigger value="ancillary">Ancillary {ancillary.length > 0 ? <Badge variant="mint">{ancillary.length}</Badge> : null}</TabsTrigger>
-          <TabsTrigger value="localSim">Local SIM {localSim.length > 0 ? <Badge variant="mint">{localSim.length}</Badge> : null}</TabsTrigger>
+          <TabsTrigger value="esim">eSIM {esim.length > 0 ? <CountChip value={esim.length} /> : null}</TabsTrigger>
+          <TabsTrigger value="ancillary">Ancillary {ancillary.length > 0 ? <CountChip value={ancillary.length} /> : null}</TabsTrigger>
+          <TabsTrigger value="localSim">Local SIM {localSim.length > 0 ? <CountChip value={localSim.length} /> : null}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -252,14 +256,21 @@ function DataTable({ loading, rows, page, pageSize, onPage, onSize, empty, colum
   const start = (page - 1) * pageSize;
   const slice = rows.slice(start, start + pageSize);
   if (loading) {
-    return <div className="space-y-2">{Array.from({ length: 5 }, (_, index) => <div key={index} className="h-8 animate-pulse rounded-xl bg-mist" />)}</div>;
+    return <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow)]"><div className="space-y-2 px-6 py-8">{Array.from({ length: 5 }, (_, index) => <div key={index} className="h-8 animate-pulse rounded-full bg-soft" />)}</div></div>;
   }
-  if (!rows.length) return empty ? <p className="text-sm text-muted">{empty}</p> : null;
+  if (!rows.length) {
+    return empty ? (
+      <div className="flex flex-col items-center justify-center rounded-3xl border border-line bg-surface px-6 py-16 text-center shadow-[var(--shadow)]">
+        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-mint text-primary"><span className="text-lg font-semibold">—</span></span>
+        <p className="mt-4 text-base font-semibold text-ink">{empty}</p>
+      </div>
+    ) : null;
+  }
   return (
-    <div className="min-w-0">
-      <div className="space-y-3 md:hidden">
+    <div className="min-w-0 overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow)]">
+      <div className="divide-y divide-line md:hidden">
         {slice.map((row, index) => (
-          <article key={start + index} className="space-y-2 rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
+          <article key={start + index} className="space-y-2 p-4">
             {render(row, start + index + 1).map((cell, cellIndex) => (
               <div key={columns[cellIndex]} className="flex items-start justify-between gap-4 text-sm">
                 <span className="text-muted">{columns[cellIndex]}</span>
@@ -269,31 +280,33 @@ function DataTable({ loading, rows, page, pageSize, onPage, onSize, empty, colum
           </article>
         ))}
       </div>
-      <div className="hidden overflow-x-auto rounded-3xl border border-line bg-surface shadow-[var(--shadow)] md:block">
-        <table className="w-full min-w-[960px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-wide text-muted"><tr>{columns.map((column) => <th key={column} className="whitespace-nowrap px-3 py-3 font-medium">{column}</th>)}</tr></thead>
-          <tbody>
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[960px] border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">
+              {columns.map((column) => <th key={column} className="whitespace-nowrap px-3 py-3.5 font-semibold first:pl-6 last:pr-6">{column}</th>)}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
             {slice.map((row, index) => (
-              <tr key={start + index} className="border-t border-line">
-                {render(row, start + index + 1).map((cell, cellIndex) => <td key={cellIndex} className="whitespace-nowrap px-3 py-3">{cell}</td>)}
+              <tr key={start + index} className="transition-colors hover:bg-soft/65">
+                {render(row, start + index + 1).map((cell, cellIndex) => <td key={cellIndex} className="whitespace-nowrap px-3 py-3.5 first:pl-6 last:pr-6">{cell}</td>)}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span>Page {page} of {pages}</span>
-        <span>{start + 1}-{Math.min(start + pageSize, rows.length)} of {rows.length}</span>
-        <div className="flex gap-1">
-          <button type="button" disabled={page === 1} onClick={() => onPage(1)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">First</button>
-          <button type="button" disabled={page === 1} onClick={() => onPage(page - 1)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">Previous</button>
-          <button type="button" disabled={page === pages} onClick={() => onPage(page + 1)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">Next</button>
-          <button type="button" disabled={page === pages} onClick={() => onPage(pages)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">Last</button>
-          <select value={pageSize} onChange={(event) => onSize(Number(event.target.value))} className="h-8 rounded-lg border border-line px-2">
-            {[10, 25, 50, 100].map((size) => <option key={size}>{size}</option>)}
-          </select>
-        </div>
-      </div>
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        totalItems={rows.length}
+        totalPages={pages}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageChange={onPage}
+        onPageSizeChange={onSize}
+        disabled={loading}
+        itemLabel="records"
+      />
     </div>
   );
 }

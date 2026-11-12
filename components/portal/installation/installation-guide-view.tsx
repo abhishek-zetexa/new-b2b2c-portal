@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { installationGuides } from "@/lib/installation-guides";
 
@@ -12,7 +13,8 @@ export function InstallationGuideView() {
   const guides = installationGuides[device];
 
   return (
-    <div className="mx-auto min-w-0 max-w-5xl space-y-6">
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Installation Guide</h1>
       <Tabs value={device} onValueChange={(value) => setDevice(value as Device)}>
         <TabsList>
           <TabsTrigger value="ios">IOS</TabsTrigger>
@@ -51,13 +53,13 @@ function GuideCard({ index, guide }: { index: number; guide: Guide }) {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => navigator.clipboard.writeText(guide.video).then(() => alert("Guide link copied to clipboard!"))}
-            className="h-11 min-w-40 flex-1 rounded-xl border border-white/20 px-4 text-sm font-semibold"
+            onClick={() => navigator.clipboard.writeText(guide.video).then(() => toast.success("Guide link copied to clipboard!"))}
+            className="inline-flex h-11 min-w-40 flex-1 cursor-pointer items-center justify-center rounded-full border border-white/25 px-4 text-sm font-semibold"
           >
             Share video Link
           </button>
           {pdf ? (
-            <a href={pdf} target="_blank" rel="noreferrer" className="inline-flex h-11 min-w-40 flex-1 items-center justify-center rounded-xl bg-[#a259ff] px-4 text-sm font-semibold text-white">
+            <a href={pdf} target="_blank" rel="noreferrer" className="inline-flex h-11 min-w-40 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-on-primary">
               Share pdf link
             </a>
           ) : null}

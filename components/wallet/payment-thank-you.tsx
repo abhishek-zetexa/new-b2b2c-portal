@@ -102,7 +102,7 @@ export function PaymentThankYou() {
           <p className="mt-3 text-sm text-muted">It is being processed in the background and can take up to 24 hours.</p>
         </>
       ) : null}
-      <Link href="/dashboard" className="mt-6 inline-flex h-10 items-center rounded-2xl bg-primary px-4 text-sm font-semibold text-white">Home Page</Link>
+      <Link href="/dashboard" className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">Home Page</Link>
     </div>
   );
 }

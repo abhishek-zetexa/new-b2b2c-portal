@@ -19,18 +19,19 @@ export function HelpView() {
   }, []);
 
   return (
-    <div className="mx-auto min-w-0 max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Help</h1>
-        <p className="mt-2 text-sm leading-6 text-muted">Answers for the partner portal.</p>
-      </div>
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Help</h1>
       <Tabs value="faqs" onValueChange={() => undefined}>
         <TabsList>
           <TabsTrigger value="faqs">FAQs</TabsTrigger>
         </TabsList>
       </Tabs>
       {loading ? <PageLoader className="min-h-40" /> : faqs.length === 0 ? (
-        <p className="text-sm">No FAQs available at the moment.</p>
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-line bg-surface px-6 py-16 text-center shadow-[var(--shadow)]">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-mint text-primary"><span className="text-lg font-semibold">?</span></span>
+          <p className="mt-4 text-base font-semibold text-ink">No data found</p>
+          <p className="mt-1.5 max-w-sm text-sm text-muted">No FAQs available at the moment.</p>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {faqs.map((faq, index) => (

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { FiSearch } from "react-icons/fi";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Icon } from "@/components/ui/icon";
+import { StatusPill } from "@/components/ui/status-pill";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/toast";
+import { toast } from "react-toastify";
 import { asList, asRecord, portalRequest, text, type JsonRecord } from "@/lib/portal-fetch";
 
 type Tab = "programs" | "issued";
@@ -123,16 +125,13 @@ export function CouponProgramsView() {
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-semibold">Coupon Programs</h1>
-          <p className="mt-2 text-sm text-muted">Manage partner coupon programs, view program criteria, and track generated traveler coupon codes.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={refresh} className="h-10 rounded-2xl border border-line px-4 text-sm">Refresh</button>
-          <button type="button" disabled={syncing} onClick={sync} className="h-10 rounded-2xl border border-line px-4 text-sm disabled:opacity-50">{syncing ? "Syncing..." : "Sync to Unlimit Mobile"}</button>
-          <button type="button" onClick={() => { setPresetProgram(""); setRegisterOpen(true); }} className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white">Register Traveler & Create Coupon</button>
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Coupon Programs</h1>
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          <button type="button" onClick={refresh} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface px-5 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary">Refresh</button>
+          <button type="button" disabled={syncing} onClick={sync} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-primary/35 bg-mint/75 px-5 text-sm font-semibold text-primary transition hover:border-primary hover:bg-mint disabled:opacity-50">{syncing ? "Syncing..." : "Sync to Unlimit Mobile"}</button>
+          <button type="button" onClick={() => { setPresetProgram(""); setRegisterOpen(true); }} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary shadow-xs transition hover:bg-primary-hover">Register Traveler & Create Coupon</button>
         </div>
       </div>
 
@@ -150,29 +149,47 @@ export function CouponProgramsView() {
             <Stat label="Zetexa Programs" value={zetexa} />
             <Stat label="Unlimitmobile Programs" value={unlimit} />
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search programs" className="field min-w-56 flex-1" />
-            <select value={platform} onChange={(event) => setPlatform(event.target.value)} className="field w-auto min-w-40"><option value="ALL">All</option><option value="zetexa">zetexa</option><option value="unlimitmobile">unlimitmobile</option></select>
-            <select value={status} onChange={(event) => setStatus(event.target.value)} className="field w-auto min-w-36"><option value="ALL">All</option><option>Active</option><option>Inactive</option></select>
-            <button type="button" onClick={() => setView(view === "grid" ? "table" : "grid")} className="h-11 rounded-2xl border border-line bg-surface px-4 text-sm font-medium">{view === "grid" ? "Table" : "Grid"}</button>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-56 max-w-full">
+              <FiSearch className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search programs"
+                aria-label="Search programs"
+                className="h-10 w-full rounded-2xl border border-line bg-page pr-3 pl-10 text-sm text-ink outline-none transition placeholder:text-[color-mix(in_srgb,var(--ink)_45%,transparent)] focus:border-primary focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--primary)_16%,transparent)]"
+              />
+            </div>
+            <FilterSelect label="Platform" value={platform} onChange={setPlatform}>
+              <option value="ALL">All platforms</option>
+              <option value="zetexa">zetexa</option>
+              <option value="unlimitmobile">unlimitmobile</option>
+            </FilterSelect>
+            <FilterSelect label="Status" value={status} onChange={setStatus}>
+              <option value="ALL">All statuses</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </FilterSelect>
+            <button type="button" onClick={() => setView(view === "grid" ? "table" : "grid")} className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary">{view === "grid" ? "Table" : "Grid"}</button>
           </div>
           {loading ? <p className="text-sm text-muted">Loading...</p> : filtered.length === 0 ? (
-            <div>
-              <h2 className="text-lg font-semibold">No Coupon Programs Found</h2>
-              <button type="button" onClick={() => { setQuery(""); setPlatform("ALL"); setStatus("ALL"); }} className="mt-2 text-sm font-semibold text-primary">Reset Filters</button>
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-line bg-surface px-6 py-16 text-center shadow-[var(--shadow)]">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-mint text-primary"><span className="text-lg font-semibold">—</span></span>
+              <h2 className="mt-4 text-base font-semibold text-ink">No Coupon Programs Found</h2>
+              <button type="button" onClick={() => { setQuery(""); setPlatform("ALL"); setStatus("ALL"); }} className="mt-5 inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-line bg-page px-5 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary">Reset Filters</button>
             </div>
           ) : view === "grid" ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((item) => <ProgramCard key={text(item.program_id)} item={item} onDetails={() => openDetails(item, setDetails)} onIssue={() => { setPresetProgram(text(item.program_id)); setRegisterOpen(true); }} />)}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <tbody>
+            <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow)]">
+              <table className="w-full border-collapse text-left text-sm">
+                <tbody className="divide-y divide-line">
                   {filtered.map((item) => (
-                    <tr key={text(item.program_id)} className="border-t border-line">
-                      <td className="py-3">{programSummary(item)}</td>
-                      <td className="py-3 text-right"><button type="button" onClick={() => openDetails(item, setDetails)} className="mr-3 text-xs font-semibold">Details</button><button type="button" onClick={() => { setPresetProgram(text(item.program_id)); setRegisterOpen(true); }} className="text-xs font-semibold">Issue Coupon</button></td>
+                    <tr key={text(item.program_id)} className="transition-colors hover:bg-soft/65">
+                      <td className="px-6 py-3.5">{programSummary(item)}</td>
+                      <td className="px-6 py-3.5 text-right"><button type="button" onClick={() => openDetails(item, setDetails)} className="mr-3 inline-flex h-9 cursor-pointer items-center rounded-full border border-line bg-page px-3 text-xs font-semibold text-ink hover:border-primary hover:text-primary">Details</button><button type="button" onClick={() => { setPresetProgram(text(item.program_id)); setRegisterOpen(true); }} className="inline-flex h-9 cursor-pointer items-center rounded-full bg-primary px-3 text-xs font-semibold text-on-primary hover:bg-primary-hover">Issue Coupon</button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -211,6 +228,33 @@ export function CouponProgramsView() {
   );
 }
 
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <label className="relative w-40 max-w-full">
+      <span className="sr-only">{label}</span>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-10 w-40 max-w-full cursor-pointer appearance-none rounded-2xl border border-line bg-page pr-8 pl-3 text-sm text-ink outline-none transition focus:border-primary focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--primary)_16%,transparent)]"
+      >
+        {children}
+      </select>
+      <Icon name="chevron" className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+    </label>
+  );
+}
+
 function Stat({ label, value }: { label: string; value: number }) {
   return <section className="rounded-3xl border border-line bg-surface p-5 shadow-[var(--shadow)]"><p className="text-sm text-muted">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p></section>;
 }
@@ -225,23 +269,30 @@ function ProgramCard({ item, onDetails, onIssue }: { item: JsonRecord; onDetails
   const packages = Array.isArray(item.packages_list) ? item.packages_list.length : 0;
   const inactive = item.status === false || item.status === "false" || item.status === 0;
   return (
-    <article className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-[var(--shadow)]">
-      <div className="flex items-start justify-between gap-3">
+    <article className="flex h-full flex-col rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">#{text(item.program_id)}</p>
+        <StatusPill status={inactive ? "Inactive" : "Active"} />
+      </div>
+      <h3 className="mt-2 text-base font-semibold leading-6 text-ink">{text(item.program_name)}</h3>
+      <p className="mt-1 text-xl font-semibold tracking-tight text-primary">{text(item.discount_percent)}% OFF</p>
+      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-2xl bg-page px-3 py-2.5 text-xs">
         <div className="min-w-0">
-          <p className="text-xs text-muted">#{text(item.program_id)}</p>
-          <h3 className="mt-1 text-lg font-semibold leading-6">{text(item.program_name)}</h3>
+          <dt className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Platform</dt>
+          <dd className="mt-0.5 truncate font-semibold text-ink">{text(item.platform) || "—"}</dd>
         </div>
-        <Badge variant={inactive ? "outline" : "success"}>{inactive ? "Inactive" : "Active"}</Badge>
-      </div>
-      <p className="text-2xl font-semibold tracking-tight text-primary">{text(item.discount_percent)}% OFF</p>
-      <div className="flex flex-wrap gap-2 text-xs text-muted">
-        <span className="rounded-full bg-mist px-2.5 py-1">{text(item.platform) || "—"}</span>
-        <span className="rounded-full bg-mist px-2.5 py-1">{text(item.default_validity_days)} days</span>
-        <span className="rounded-full bg-mist px-2.5 py-1">{packages || "All / Unlimited"}</span>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-2">
-        <button type="button" onClick={onDetails} className="h-9 rounded-xl border border-line px-3 text-xs font-semibold">Details</button>
-        <button type="button" onClick={onIssue} className="h-9 rounded-xl bg-primary px-3 text-xs font-semibold text-white">Issue Coupon</button>
+        <div className="min-w-0">
+          <dt className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Validity</dt>
+          <dd className="mt-0.5 font-semibold text-ink">{text(item.default_validity_days)} days</dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Packages</dt>
+          <dd className="mt-0.5 truncate font-semibold text-ink">{packages || "All"}</dd>
+        </div>
+      </dl>
+      <div className="mt-3 flex gap-2">
+        <button type="button" onClick={onDetails} className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center rounded-full border border-line bg-page px-3 text-xs font-semibold text-ink transition hover:border-primary hover:text-primary">Details</button>
+        <button type="button" onClick={onIssue} className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center rounded-full bg-primary px-3 text-xs font-semibold text-on-primary transition hover:bg-primary-hover">Issue Coupon</button>
       </div>
     </article>
   );
@@ -309,18 +360,23 @@ function IssuedTable(props: {
           <option value="ALL">All programs</option>
           {props.programs.map((item) => <option key={text(item.program_id)} value={text(item.program_id)}>{text(item.program_name)}</option>)}
         </select>
-        <button type="button" onClick={props.onSearch} className="h-11 rounded-2xl border border-line bg-surface px-4 text-sm font-medium">Search</button>
+        <button type="button" onClick={props.onSearch} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">Search</button>
       </div>
       {props.codes.length === 0 ? (
-        <div>
-          <p className="text-sm">No coupons.</p>
-          <button type="button" onClick={props.onRegister} className="mt-2 text-sm font-semibold text-primary">Register Traveler & Issue Coupon</button>
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-line bg-surface px-6 py-16 text-center shadow-[var(--shadow)]">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-mint text-primary"><span className="text-lg font-semibold">—</span></span>
+          <p className="mt-4 text-base font-semibold text-ink">No data found</p>
+          <button type="button" onClick={props.onRegister} className="mt-5 inline-flex h-10 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">Register Traveler & Issue Coupon</button>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-3xl border border-line bg-surface shadow-[var(--shadow)]">
           <table className="w-full min-w-[880px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-muted"><tr>{["Coupon Code", "Usage State", "Program & Platform", "Traveler Details", "Customer Details", "Reseller Email", "Generated Date", "Actions"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3 font-medium">{column}</th>)}</tr></thead>
-            <tbody>
+            <thead>
+              <tr className="border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">
+                {["Coupon Code", "Usage State", "Program & Platform", "Traveler Details", "Customer Details", "Reseller Email", "Generated Date", "Actions"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3.5 font-semibold first:pl-6 last:pr-6">{column}</th>)}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
               {props.codes.map((item, index) => {
                 const traveler = asRecord(item.traveler);
                 const customer = asRecord(item.customer);
@@ -328,9 +384,9 @@ function IssuedTable(props: {
                 const code = text(item.coupon_code) || "N/A";
                 const hideRevoke = state === "REVOKED" || state === "USED" || !text(item.coupon_code);
                 return (
-                  <tr key={code + index} className="border-t border-line align-top">
+                  <tr key={code + index} className="align-top transition-colors hover:bg-soft/65">
                     <td className="whitespace-nowrap px-3 py-3 font-mono text-xs">{code} {text(item.coupon_code) ? <button type="button" className="ml-2 font-sans font-semibold text-primary" onClick={() => navigator.clipboard.writeText(text(item.coupon_code)).then(() => toast.success("Coupon Code copied to clipboard!"))}>Copy</button> : null}</td>
-                    <td className="px-3 py-3"><Badge variant={state === "USED" ? "success" : state === "REVOKED" || state === "EXPIRED" ? "outline" : "warning"}>{state}</Badge></td>
+                    <td className="px-3 py-3.5"><StatusPill status={state} /></td>
                     <td className="px-3 py-3">{text(item.program_name)} · {text(item.platform)}</td>
                     <td className="max-w-56 px-3 py-3 leading-5">{[text(traveler?.first_name), text(traveler?.last_name), text(traveler?.email), text(traveler?.phone_number), text(traveler?.university_name), text(traveler?.city)].filter(Boolean).join(", ") || "—"}</td>
                     <td className="max-w-56 px-3 py-3 leading-5">{[text(customer?.first_name), text(customer?.last_name), text(customer?.email), text(customer?.phone)].filter(Boolean).join(", ") || "—"}</td>
@@ -347,8 +403,8 @@ function IssuedTable(props: {
       <div className="flex items-center justify-between text-xs">
         <span>Showing page {page} of {pages} (Total {total} coupons)</span>
         <div className="flex gap-2">
-          <button type="button" disabled={!props.pagination?.has_previous} onClick={() => props.onPage(page - 1)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">Previous</button>
-          <button type="button" disabled={!props.pagination?.has_next} onClick={() => props.onPage(page + 1)} className="h-8 rounded-lg border border-line px-2 disabled:opacity-40">Next</button>
+          <button type="button" disabled={!props.pagination?.has_previous} onClick={() => props.onPage(page - 1)} className="inline-flex h-9 cursor-pointer items-center rounded-xl border border-line bg-page px-3 text-xs font-semibold text-ink transition hover:border-primary hover:bg-mint/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-45">Previous</button>
+          <button type="button" disabled={!props.pagination?.has_next} onClick={() => props.onPage(page + 1)} className="inline-flex h-9 cursor-pointer items-center rounded-xl border border-line bg-page px-3 text-xs font-semibold text-ink transition hover:border-primary hover:bg-mint/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-45">Next</button>
         </div>
       </div>
     </div>
@@ -431,7 +487,7 @@ function RegisterDialog({ open, programs, preset, onClose }: { open: boolean; pr
             <select value={form.dial} onChange={(event) => setForm({ ...form, dial: event.target.value })} className="h-10 rounded-2xl border border-line px-3"><option value="+91">India +91</option><option value="+44">United Kingdom +44</option><option value="+1">United States +1</option></select>
             <input required placeholder="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="h-10 flex-1 rounded-2xl border border-line px-3" />
           </label>
-          <button disabled={busy} className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white sm:col-span-2 disabled:opacity-50">{busy ? "Issuing..." : "Submit"}</button>
+          <button disabled={busy} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50 sm:col-span-2">{busy ? "Issuing..." : "Submit"}</button>
         </form>
       )}
     </Dialog>

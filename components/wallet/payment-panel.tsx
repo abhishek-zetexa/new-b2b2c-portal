@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/toast";
+import { toast } from "react-toastify";
 import { asList, asRecord, portalRequest, text, type JsonRecord } from "@/lib/portal-fetch";
 
 type Keys = { stripePublishableKey: string; razorpayKey: string };
@@ -100,7 +100,7 @@ function StripeForm({ embedded, initialAmount, methodId, bankMethods }: { embedd
           </a>
         </p>
       ) : null}
-      <button type="button" disabled={busy || !/^\d{1,8}$/.test(amount) || Number(amount) < minimum} onClick={proceed} className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white disabled:opacity-50">
+      <button type="button" disabled={busy || !/^\d{1,8}$/.test(amount) || Number(amount) < minimum} onClick={proceed} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50">
         Proceed to Payment
       </button>
       {secret ? <StripeElement secret={secret} resellerId={meta.resellerId} requestId={meta.requestId} /> : null}
@@ -108,37 +108,86 @@ function StripeForm({ embedded, initialAmount, methodId, bankMethods }: { embedd
   );
 }
 
+type StripeClient = {
+  elements: (options: unknown) => {
+    create: (type: string, options: unknown) => StripePaymentElement;
+  };
+  confirmPayment: (options: unknown) => Promise<{ error?: { message?: string } }>;
+};
+
+type StripePaymentElement = {
+  mount: (target: HTMLElement) => void;
+  unmount: () => void;
+  on: (event: "ready" | "loaderror", handler: (event: { error?: { message?: string } }) => void) => void;
+};
+
 function StripeElement({ secret, resellerId, requestId }: { secret: string; resellerId: string; requestId: string }) {
-  const [stripe, setStripe] = useState<{ confirmPayment: (options: unknown) => Promise<{ error?: { message?: string } }> } | null>(null);
-  const [elements, setElements] = useState<unknown>(null);
+  const mountNode = useRef<HTMLDivElement>(null);
+  const stripeRef = useRef<StripeClient | null>(null);
+  const elementsRef = useRef<unknown>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+    let payment: StripePaymentElement | null = null;
+    setReady(false);
+    setError("");
+
     (async () => {
-      await loadScript("https://js.stripe.com/v3/");
+      await loadScript("https://js.stripe.com/v3/", () => Boolean((window as unknown as { Stripe?: unknown }).Stripe));
       const keys = await portalRequest<Keys>("/api/finance/keys");
-      const factory = (window as unknown as { Stripe?: (key: string) => { elements: (options: unknown) => { create: (type: string, options: unknown) => { mount: (target: string) => void } }; confirmPayment: (options: unknown) => Promise<{ error?: { message?: string } }> } }).Stripe;
-      if (!active || !factory || !keys.stripePublishableKey) return;
-      const next = factory(keys.stripePublishableKey);
-      const els = next.elements({ clientSecret: secret });
-      els.create("payment", { layout: "tabs" }).mount("#payment-element");
-      setStripe(next);
-      setElements(els);
-    })().catch((err: Error) => toast.error(err.message));
+      const factory = (window as unknown as { Stripe?: (key: string) => StripeClient }).Stripe;
+      const node = mountNode.current;
+      if (!active) return;
+      if (!factory || !keys.stripePublishableKey || !node) {
+        throw new Error("Stripe is not configured.");
+      }
+      const stripe = factory(keys.stripePublishableKey);
+      const elements = stripe.elements({ clientSecret: secret });
+      payment = elements.create("payment", { layout: "tabs" });
+      payment.on("ready", () => {
+        if (active) setReady(true);
+      });
+      payment.on("loaderror", (event) => {
+        if (!active) return;
+        const message = event.error?.message || "Card form could not be loaded.";
+        setError(message);
+        toast.error(message);
+      });
+      payment.mount(node);
+      stripeRef.current = stripe;
+      elementsRef.current = elements;
+    })().catch((err: unknown) => {
+      if (!active) return;
+      const message = err instanceof Error ? err.message : "Card form could not be loaded.";
+      setError(message);
+      toast.error(message);
+    });
+
     return () => {
       active = false;
+      payment?.unmount();
+      stripeRef.current = null;
+      elementsRef.current = null;
     };
   }, [secret]);
 
   return (
-    <div>
-      <div id="payment-element" className="mt-3 rounded-2xl border border-line p-3" />
+    <div className="rounded-2xl border border-line bg-page p-4">
+      <h3 className="text-base font-semibold text-ink">Stripe Payment</h3>
+      {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
+      {!ready && !error ? <p className="mt-2 text-sm text-muted">Loading card form...</p> : null}
+      <div ref={mountNode} id="payment-element" className="mt-3 min-h-40" />
       <button
         type="button"
         id="submit-button"
-        className="mt-3 h-10 rounded-2xl bg-navy px-4 text-sm font-semibold text-white"
+        disabled={!ready}
+        className="mt-3 inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         onClick={async () => {
-          if (!stripe) return;
+          const stripe = stripeRef.current;
+          const elements = elementsRef.current;
+          if (!stripe || !elements) return;
           const result = await stripe.confirmPayment({
             elements,
             confirmParams: {
@@ -227,7 +276,7 @@ function RazorpayForm({ embedded, initialAmount, methodId }: { embedded: boolean
         <input value={amount} inputMode="numeric" onChange={(event) => setAmount(event.target.value.replace(/\D/g, "").slice(0, 8))} className="field mt-2" />
       </label>
       {embedded && amount && Number(amount) < 25000 ? <p className="text-sm text-danger">Minimum top-up is ₹25,000.</p> : null}
-      <button type="button" disabled={!valid || busy} onClick={brief} className="h-10 rounded-2xl border border-line px-4 text-sm font-semibold disabled:opacity-50">Get Amount Brief</button>
+      <button type="button" disabled={!valid || busy} onClick={brief} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface px-5 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary disabled:opacity-50">Get Amount Brief</button>
       {quote ? (
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           <div>Amount: {text(quote.amount)}</div>
@@ -240,7 +289,7 @@ function RazorpayForm({ embedded, initialAmount, methodId }: { embedded: boolean
       ) : null}
       <p className="text-xs leading-5 text-muted">Domestic cards, UPI, netbanking, and wallets typically 2% + GST. International cards up to 3% + GST. Final charges vary.</p>
       <p className="text-sm"><span className="text-danger">Note:</span> Your payment will be verified by our accountant and reflected in your wallet within 6 business hours.</p>
-      <button type="button" disabled={!quote || busy} onClick={pay} className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white disabled:opacity-50">Submit</button>
+      <button type="button" disabled={!quote || busy} onClick={pay} className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50">Submit</button>
     </div>
   );
 }
@@ -294,7 +343,7 @@ function UpiForm({ embedded, methodId }: { embedded: boolean; methodId: string }
       <input required placeholder="UPI Reference Number" value={form.transactionId} onChange={(event) => setForm({ ...form, transactionId: event.target.value })} className="field" />
       <input required type="date" readOnly value={form.transactionDate} onChange={(event) => setForm({ ...form, transactionDate: event.target.value })} onClick={(event) => (event.currentTarget.readOnly = false)} className="field" />
       <input required placeholder="Payer UPI ID" value={form.upiId} onChange={(event) => setForm({ ...form, upiId: event.target.value })} className="field" />
-      <button className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white">Submit</button>
+      <button className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">Submit</button>
     </form>
   );
 }
@@ -372,21 +421,38 @@ function BankForm({ embedded, methodId, currency }: { embedded: boolean; methodI
         <option value="INR">INR</option>
         <option value="USD">USD</option>
       </select>
-      <button className="h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-white">Submit</button>
+      <button className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">Submit</button>
     </form>
   );
 }
 
-function loadScript(src: string) {
+function loadScript(src: string, ready?: () => boolean) {
   return new Promise<void>((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
+    const fail = () => reject(new Error("Payment script failed to load."));
+    const finish = () => {
+      if (!ready || ready()) resolve();
+      else fail();
+    };
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+    if (existing) {
+      if (existing.dataset.loaded === "true" || ready?.()) {
+        finish();
+        return;
+      }
+      existing.addEventListener("load", () => {
+        existing.dataset.loaded = "true";
+        finish();
+      }, { once: true });
+      existing.addEventListener("error", fail, { once: true });
       return;
     }
     const script = document.createElement("script");
     script.src = src;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Payment script failed to load."));
+    script.onload = () => {
+      script.dataset.loaded = "true";
+      finish();
+    };
+    script.onerror = fail;
     document.body.appendChild(script);
   });
 }

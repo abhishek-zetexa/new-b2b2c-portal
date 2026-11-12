@@ -7,7 +7,8 @@ import { usePartner } from "@/components/shell/partner-context";
 import { hasPermission } from "@/lib/auth-session";
 import { asList, asRecord, money, num, portalRequest, text, type JsonRecord } from "@/lib/portal-fetch";
 import { formatLedgerTime, formatUtcStamp } from "@/lib/portal-time";
-import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import { StatusPill } from "@/components/ui/status-pill";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageLoader } from "@/components/ui/wave-loader";
 
@@ -32,8 +33,14 @@ export function WalletView() {
       .catch((err: Error & { status?: number }) => setError(err.status === 403 ? denied : err.message));
   }, []);
 
-  if (error) return <p className="text-sm text-danger">{error}</p>;
-  if (!gate || !partner.ready) return <p className="text-sm text-muted">Checking your wallet…</p>;
+  if (error) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        <EmptyState title="Unable to load wallet" body={error} tone="danger" />
+      </div>
+    );
+  }
+  if (!gate || !partner.ready) return <PageLoader className="min-h-40" />;
   if (gate.required && gate.currency) return <FirstTopUp currency={gate.currency} />;
   return <WalletLedger />;
 }
@@ -88,7 +95,7 @@ function FirstTopUp({ currency }: { currency: "INR" | "USD" }) {
       <div className="mt-4 grid gap-3">
         {methods.map((method) => (
           <button key={text(method.id)} type="button" onClick={() => setSelected(method)} className="flex items-center gap-3 rounded-2xl border border-line px-4 py-3 text-left">
-            {text(method.link) ? <img src={text(method.link)} alt="" className="h-8 w-8 object-contain" /> : null}
+            {text(method.link) ? <img src={text(method.link)} alt="" className={methodMarkClass(text(method.name))} /> : null}
             <span className="font-medium">{text(method.name)}</span>
           </button>
         ))}
@@ -171,11 +178,12 @@ function WalletLedger() {
   const symbol = currency.toUpperCase().includes("INR") || currency === "₹" ? "₹" : "$";
 
   return (
-    <div className="mx-auto grid min-w-0 max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
-      <div className="min-w-0 space-y-6">
+    <div className="mx-auto grid min-w-0 max-w-6xl gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="min-w-0 space-y-5">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Wallet</h1>
         <section className="rounded-3xl border border-line bg-surface p-6 shadow-[var(--shadow)]">
           <p className="text-sm text-muted">Your Wallet Balance</p>
-          <p className="mt-2 text-3xl font-semibold">{balance === null ? "—" : `${currency} ${balance.toFixed(2)}`}</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-ink">{balance === null ? "—" : `${currency} ${balance.toFixed(2)}`}</p>
           <p className="mt-3 text-sm">{symbol === "₹" ? "Minimum wallet recharge amount is ₹25,000." : "Minimum wallet recharge amount is $1,000 ."}</p>
         </section>
 
@@ -195,36 +203,38 @@ function WalletLedger() {
           </section>
         ) : null}
 
-        <section className="rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow)] sm:p-6">
-          <Tabs value={ledger} onValueChange={(value) => openLedger(value as Ledger)}>
-            <TabsList>
-              {canWallet ? <TabsTrigger value="wallet">Wallet Transactions</TabsTrigger> : null}
-              {canOrders ? <TabsTrigger value="orders">Orders Transactions</TabsTrigger> : null}
-              {canCashback ? <TabsTrigger value="cashback">Cashback History</TabsTrigger> : null}
-            </TabsList>
-          </Tabs>
-          {loading ? <PageLoader className="min-h-40" /> : error ? <p className="mt-4 text-sm text-danger">{error}</p> : rows.length === 0 ? <p className="mt-6 text-sm">No Records</p> : (
+        <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[var(--shadow)]">
+          <div className="border-b border-line px-4 py-4 sm:px-6">
+            <Tabs value={ledger} onValueChange={(value) => openLedger(value as Ledger)}>
+              <TabsList>
+                {canWallet ? <TabsTrigger value="wallet">Wallet Transactions</TabsTrigger> : null}
+                {canOrders ? <TabsTrigger value="orders">Orders Transactions</TabsTrigger> : null}
+                {canCashback ? <TabsTrigger value="cashback">Cashback History</TabsTrigger> : null}
+              </TabsList>
+            </Tabs>
+          </div>
+          {loading ? <PageLoader className="min-h-40" /> : error ? <EmptyState title="Unable to load transactions" body={error} tone="danger" /> : rows.length === 0 ? <EmptyState title="No data found" body="No Records" /> : (
             <>
-            <div className="mt-4 space-y-3 md:hidden">
+            <div className="divide-y divide-line md:hidden">
               {rows.map((row, index) => <LedgerCard key={text(row.request_id || row.order_id || row.id) || index} ledger={ledger} row={row} />)}
             </div>
-            <div className="mt-4 hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[720px] border-separate border-spacing-0 text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-muted">
-                  {ledger === "wallet" ? <tr>{["Order Id", "Created on", "Order value", "Transaction Type", "Transaction Status"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3 font-medium">{column}</th>)}</tr> : null}
-                  {ledger === "orders" ? <tr>{["Order Id", "Ordered On", "Previous Value", "Order Value", "Transaction Type", "Current Balance"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3 font-medium">{column}</th>)}</tr> : null}
-                  {ledger === "cashback" ? <tr>{["eSIM Orders", "Addon Orders", "eSIM Revenue", "Addon Revenue", "Total Revenue", "Cashback %", "Cashback Amount", "CASH BACK DATE"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3 font-medium">{column}</th>)}</tr> : null}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                <thead>
+                  {ledger === "wallet" ? <tr className="border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">{["Order Id", "Created on", "Order value", "Transaction Type", "Transaction Status"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3.5 font-semibold first:pl-6 last:pr-6">{column}</th>)}</tr> : null}
+                  {ledger === "orders" ? <tr className="border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">{["Order Id", "Ordered On", "Previous Value", "Order Value", "Transaction Type", "Current Balance"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3.5 font-semibold first:pl-6 last:pr-6">{column}</th>)}</tr> : null}
+                  {ledger === "cashback" ? <tr className="border-b border-line bg-soft/85 text-[11px] font-semibold tracking-[0.14em] text-muted uppercase">{["eSIM Orders", "Addon Orders", "eSIM Revenue", "Addon Revenue", "Total Revenue", "Cashback %", "Cashback Amount", "CASH BACK DATE"].map((column) => <th key={column} className="whitespace-nowrap px-3 py-3.5 font-semibold first:pl-6 last:pr-6">{column}</th>)}</tr> : null}
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-line">
                   {rows.map((row, index) => (
-                    <tr key={text(row.request_id || row.order_id || row.id) || index} className="border-t border-line">
+                    <tr key={text(row.request_id || row.order_id || row.id) || index} className="transition-colors hover:bg-soft/65">
                       {ledger === "wallet" ? (
                         <>
                           <td className="max-w-56 break-all px-3 py-3">{text(row.request_id)}</td>
                           <td className="whitespace-nowrap px-3 py-3">{formatLedgerTime(row.created_on, true)}</td>
                           <td className="whitespace-nowrap px-3 py-3">{num(row.amount).toFixed(2)} {text(row.currency)}</td>
                           <td className="whitespace-nowrap px-3 py-3">{text(row.transaction_type)}</td>
-                          <td className="px-3 py-3"><StatusBadge status={text(row.transaction_status)} /></td>
+                          <td className="px-3 py-3.5"><StatusPill status={text(row.transaction_status)} /></td>
                         </>
                       ) : null}
                       {ledger === "orders" ? (
@@ -256,16 +266,17 @@ function WalletLedger() {
             </div>
             </>
           )}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <select value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(0); }} className="field h-10 w-auto py-0">
-              {pageSizes.map((size) => <option key={size} value={size}>{size}</option>)}
-            </select>
-            <div className="flex items-center gap-2">
-              <button type="button" disabled={page <= 0} onClick={() => setPage((current) => current - 1)} className="h-8 rounded-xl border border-line px-3 disabled:opacity-40">Previous</button>
-              <span>{page + 1} / {pages}</span>
-              <button type="button" disabled={page + 1 >= pages} onClick={() => setPage((current) => current + 1)} className="h-8 rounded-xl border border-line px-3 disabled:opacity-40">Next</button>
-            </div>
-          </div>
+          <Pagination
+            page={page + 1}
+            pageSize={pageSize}
+            totalItems={total}
+            totalPages={pages}
+            pageSizeOptions={pageSizes}
+            onPageChange={(next) => setPage(next - 1)}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+            disabled={loading}
+            itemLabel="transactions"
+          />
         </section>
       </div>
 
@@ -274,8 +285,8 @@ function WalletLedger() {
           <h2 className="font-semibold">Recharge Options</h2>
           <div className="mt-4 space-y-2">
             {methods.map((method) => (
-              <button key={text(method.id)} type="button" onClick={() => router.push(`/transactions/payment/${text(method.fe_name)}/${text(method.id)}`)} className="flex w-full items-center gap-3 rounded-2xl border border-line px-3 py-3 text-left">
-                {text(method.link) ? <img src={text(method.link)} alt="" className="h-8 w-8 object-contain" /> : null}
+              <button key={text(method.id)} type="button" onClick={() => router.push(`/transactions/payment/${text(method.fe_name)}/${text(method.id)}`)} className="flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-line bg-page px-3 py-3 text-left transition hover:border-primary/45 hover:bg-mint/60">
+                {text(method.link) ? <img src={text(method.link)} alt="" className={methodMarkClass(text(method.name))} /> : null}
                 <span>{text(method.name)}</span>
               </button>
             ))}
@@ -286,6 +297,12 @@ function WalletLedger() {
   );
 }
 
+function methodMarkClass(name: string) {
+  const key = name.toLowerCase();
+  const mono = key.includes("bank") || key.includes("upi");
+  return `h-8 w-8 shrink-0 object-contain${mono ? " brightness-0" : ""}`;
+}
+
 function LedgerCard({ ledger, row }: { ledger: Ledger; row: JsonRecord }) {
   const fields = ledger === "wallet"
     ? [["Order Id", text(row.request_id)], ["Created on", formatLedgerTime(row.created_on, true)], ["Order value", `${num(row.amount).toFixed(2)} ${text(row.currency)}`], ["Transaction Type", text(row.transaction_type)]]
@@ -293,20 +310,26 @@ function LedgerCard({ ledger, row }: { ledger: Ledger; row: JsonRecord }) {
       ? [["Order Id", text(row.order_id)], ["Ordered On", formatLedgerTime(row.created_on, false)], ["Previous Value", text(row.previous_balance)], ["Order Value", text(row.amount)], ["Transaction Type", text(row.transaction_type)], ["Current Balance", text(row.balance)]]
       : [["eSIM Orders", text(row.total_esim_orders)], ["Addon Orders", text(row.total_addon_orders)], ["eSIM Revenue", money(num(row.esim_revenue), text(row.currency))], ["Addon Revenue", money(num(row.addon_revenue), text(row.currency))], ["Total Revenue", money(num(row.total_revenue), text(row.currency))], ["Cashback %", text(row.cashback_percentage)], ["Cashback Amount", money(num(row.cashback_amount), text(row.currency))], ["CASH BACK DATE", formatUtcStamp(row.created_at)]];
   return (
-    <article className="space-y-2 rounded-2xl border border-line p-4">
+    <article className="space-y-2 p-4">
       {fields.map(([label, value]) => (
         <div key={label} className="flex items-start justify-between gap-4 text-sm">
           <span className="text-muted">{label}</span>
           <span className="max-w-[60%] break-all text-right">{value}</span>
         </div>
       ))}
-      {ledger === "wallet" ? <div className="flex justify-end"><StatusBadge status={text(row.transaction_status)} /></div> : null}
+      {ledger === "wallet" ? <div className="flex justify-end"><StatusPill status={text(row.transaction_status)} /></div> : null}
     </article>
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  if (status === "SUCCESS") return <Badge variant="success">{status}</Badge>;
-  if (status === "PENDING") return <Badge variant="danger">{status}</Badge>;
-  return <Badge variant="outline">{status}</Badge>;
+function EmptyState({ title, body, tone = "muted" }: { title: string; body: string; tone?: "muted" | "danger" }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
+      <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tone === "danger" ? "bg-danger/10 text-danger" : "bg-mint text-primary"}`}>
+        <span className="text-lg font-semibold" aria-hidden="true">{tone === "danger" ? "!" : "—"}</span>
+      </span>
+      <p className="mt-4 text-base font-semibold text-ink">{title}</p>
+      <p className="mt-1 max-w-md text-sm text-muted">{body}</p>
+    </div>
+  );
 }
