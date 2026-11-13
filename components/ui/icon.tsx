@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 const simplePaths: Record<string, string> = {
   grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
+  list: "M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01",
   box: "M4 8l8-4 8 4-8 4-8-4zM4 8v8l8 4 8-4V8M12 12v8",
   sim: "M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM9 13h6v6H9z",
   plane: "M3 12l18-7-7 18-2-7-9-4z",
@@ -27,6 +28,7 @@ const simplePaths: Record<string, string> = {
   "chevron-right": "M9 18l6-6-6-6",
   check: "M5 12.5l4.2 4.2L19 7.5",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  play: "M8 5.5v13l11-6.5-11-6.5z",
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35",
   clock: "M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
   download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",

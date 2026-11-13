@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { SectionPage } from "@/components/portal/section-page";
+import { Suspense } from "react";
+import { CatalogView } from "@/components/portal/buy-sims/catalog-view";
+import { PageLoader } from "@/components/ui/wave-loader";
 
 export const metadata: Metadata = { title: "Buy SIMs" };
 
 export default function Page() {
   return (
-    <SectionPage
-      eyebrow="Buy SIMs"
-      title="Buy SIMs"
-      description="Choose a destination, data plan, and traveller, then issue the eSIM from the portal."
-    />
+    <Suspense fallback={<PageLoader />}>
+      <CatalogView />
+    </Suspense>
   );
 }

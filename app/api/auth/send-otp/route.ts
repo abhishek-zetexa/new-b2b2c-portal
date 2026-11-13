@@ -17,7 +17,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { response, payload } = await postCustomer("Reseller/Agent/SendOtp", { email, action });
+    let { response, payload } = await postCustomer("Reseller/Agent/SendOtp", { email, action });
+    if (!response.ok && (response.status === 502 || response.status === 503)) {
+      ({ response, payload } = await postCustomer("Reseller/Agent/SendOtp", { email, action }));
+    }
     if (!response.ok) {
       return Response.json({ message: apiMessage(payload, "Could not send the code. Try again.") }, { status: response.status || 502 });
     }

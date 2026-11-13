@@ -58,6 +58,9 @@ html[data-theme="dark"] .theme-moon,
 html:not([data-theme="dark"]) .theme-sun {
   display: none;
 }
+html[data-theme="dark"] .carrier-logo {
+  filter: brightness(2.2);
+}
 `;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

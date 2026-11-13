@@ -184,7 +184,8 @@ export function AddonsSettings({ resellerId, agentId }: { resellerId: string; ag
       const res = await portalRequest<JsonRecord>(`/api/settings?${query.toString()}`);
       setRows(addonRows(res));
     } catch (err) {
-      if (!(err instanceof PortalRequestError && err.status === 401)) console.error(err);
+      const missing = err instanceof PortalRequestError && (err.status === 404 || /no settings found/i.test(err.message));
+      if (!(err instanceof PortalRequestError && err.status === 401) && !missing) console.error(err);
       if (initial) setRows([]);
     } finally {
       if (initial) setLoading(false);

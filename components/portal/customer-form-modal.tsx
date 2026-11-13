@@ -18,7 +18,7 @@ import {
 
 const postalPattern = /^[A-Za-z0-9 -]{3,10}$/;
 
-function CountrySearchSelect({
+export function CountrySearchSelect({
   id,
   label,
   value,

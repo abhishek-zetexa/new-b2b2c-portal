@@ -13,6 +13,8 @@ export type AuthUser = {
   role: string;
   dashboardEnabled: boolean;
   cashbackEligible: boolean;
+  voiceSmsPlans: boolean;
+  mvnoAccess: boolean;
   featureAccess: FeatureAccess;
 };
 
@@ -52,6 +54,8 @@ export function parseAuthUser(raw: string | undefined): AuthUser | null {
       role: typeof value.role === "string" ? value.role : "",
       dashboardEnabled: value.dashboardEnabled !== false,
       cashbackEligible: cashback === true || cashback === "true",
+      voiceSmsPlans: value.voiceSmsPlans === true,
+      mvnoAccess: value.mvnoAccess === true,
       featureAccess: featureAccessFrom(value.featureAccess),
     };
   } catch {

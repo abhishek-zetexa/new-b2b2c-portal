@@ -19,21 +19,26 @@ const cookieOptions = {
   maxAge: 60 * 60 * 12,
 };
 
+function plainMessage(value: unknown) {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed || /<[a-z!/]/i.test(trimmed) || /nginx|service temporarily unavailable/i.test(trimmed)) return "";
+  return trimmed;
+}
+
 export function apiMessage(body: unknown, fallback: string) {
   if (!body || typeof body !== "object") return fallback;
   const record = body as Record<string, unknown>;
-  if (typeof record.detail === "string" && record.detail) return record.detail;
-  if (typeof record.message === "string" && record.message) return record.message;
-  if (typeof record.error === "string" && record.error) return record.error;
+  const direct = plainMessage(record.detail) || plainMessage(record.message) || plainMessage(record.error);
+  if (direct) return direct;
   if (record.error && typeof record.error === "object") {
     const nested = record.error as Record<string, unknown>;
-    if (typeof nested.detail === "string" && nested.detail) return nested.detail;
-    if (typeof nested.message === "string" && nested.message) return nested.message;
-    if (typeof nested.error === "string" && nested.error) return nested.error;
+    const nestedMessage = plainMessage(nested.detail) || plainMessage(nested.message) || plainMessage(nested.error);
+    if (nestedMessage) return nestedMessage;
   }
   if (Array.isArray(record.errors) && record.errors[0] && typeof record.errors[0] === "object") {
-    const message = (record.errors[0] as { message?: unknown }).message;
-    if (typeof message === "string" && message) return message;
+    const message = plainMessage((record.errors[0] as { message?: unknown }).message);
+    if (message) return message;
   }
   return fallback;
 }
@@ -100,6 +105,8 @@ export function userFromAuthPayload(payload: unknown, fallbackEmail: string): { 
       role: text(record.role),
       dashboardEnabled: info?.dashboard_enabled !== false,
       cashbackEligible: cashback === true || cashback === "true",
+      voiceSmsPlans: info?.display_voice_sms_plans === true || reseller?.display_voice_sms_plans === true,
+      mvnoAccess: info?.mvno_access === true || reseller?.mvno_access === true,
       featureAccess: featureAccessFrom(roles?.["role-access"]),
     },
   };

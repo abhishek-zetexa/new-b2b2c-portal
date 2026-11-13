@@ -11,6 +11,8 @@ export async function GET() {
     agentId: user.agentId,
     role: user.role,
     cashbackEligible: user.cashbackEligible,
+    voiceSmsPlans: user.voiceSmsPlans,
+    mvnoAccess: user.mvnoAccess,
     featureAccess: user.featureAccess,
   });
 }
