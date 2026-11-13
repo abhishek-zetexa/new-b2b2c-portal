@@ -232,9 +232,12 @@ export function CatalogView() {
                     {tab === "country" && item.price != null ? (
                       <span className="block text-xs text-muted">Plans start from {moneyAmount(item.price, item.currency || currency, 2)}</span>
                     ) : null}
-                    {item.carrier ? <span className="block truncate text-xs text-muted">{item.carrier}</span> : null}
+                    {item.carrierLogo ? (
+                      <img src={item.carrierLogo} alt={item.carrier || "Carrier"} className="carrier-logo mt-1 h-4 w-auto max-w-full object-contain object-left" />
+                    ) : item.carrier ? (
+                      <span className="block truncate text-xs text-muted">{item.carrier}</span>
+                    ) : null}
                   </span>
-                  {item.carrierLogo ? <img src={item.carrierLogo} alt="" className="h-6 max-w-16 shrink-0 object-contain" /> : null}
                   <Icon name="chevron-right" className="h-4 w-4 shrink-0 text-muted" />
                 </Link>
                 {tab === "region" ? (

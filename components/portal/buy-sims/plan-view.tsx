@@ -389,7 +389,7 @@ export function PlanView({ kind, code }: { kind: PlanKind; code: string }) {
                     <h2 className="min-w-0 truncate text-base font-semibold text-ink" title={localFlow ? row.displayName : row.name}>{localFlow ? row.displayName : row.name}</h2>
                     {!localFlow && row.coverage ? <span className="shrink-0 rounded-full bg-mint px-2.5 py-1 text-xs font-semibold text-primary md:hidden">{row.coverage} Speed</span> : null}
                   </div>
-                  {localFlow && row.carrierLogo ? <img src={row.carrierLogo} alt={row.carrier || "Carrier"} className="mt-2 h-8 w-auto object-contain" /> : null}
+                  {localFlow && row.carrierLogo ? <img src={row.carrierLogo} alt={row.carrier || "Carrier"} className="carrier-logo mt-2 h-4 w-auto max-w-full object-contain object-left" /> : null}
                   {!localFlow && row.network ? <p className="mt-1 text-sm font-medium" style={{ color: "#d9534f" }}>{row.network}</p> : null}
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 px-4 py-3">
