@@ -65,17 +65,7 @@ export async function upstream(url: string, init: RequestInit = {}, timeoutMs = 
   return request.finally(() => inflight.delete(url));
 }
 
-async function sendUpstream(url: string, init: RequestInit, timeoutMs: number) {
-  const method = (init.method || "GET").toUpperCase();
-  let result = await upstreamData(url, init, timeoutMs);
-  // A 503 from inventory often clears within a second. An immediate second call hits the same outage.
-  if (method === "GET") {
-    for (const pause of [700, 1400]) {
-      if (result.status !== 502 && result.status !== 503) break;
-      await wait(pause);
-      result = await upstreamData(url, init, timeoutMs);
-    }
-  }
+export function upstreamResponse(result: { status: number; payload: unknown }) {
   if (result.status >= 400) {
     const message = apiMessage(result.payload, "The service request failed.");
     const connectionFailed = /service connection failed|unable to validate reseller/i.test(message);
@@ -91,4 +81,18 @@ async function sendUpstream(url: string, init: RequestInit, timeoutMs: number) {
     return Response.json({ message }, { status: result.status });
   }
   return Response.json(result.payload);
+}
+
+async function sendUpstream(url: string, init: RequestInit, timeoutMs: number) {
+  const method = (init.method || "GET").toUpperCase();
+  let result = await upstreamData(url, init, timeoutMs);
+  // A 503 from inventory often clears within a second. An immediate second call hits the same outage.
+  if (method === "GET") {
+    for (const pause of [700, 1400]) {
+      if (result.status !== 502 && result.status !== 503) break;
+      await wait(pause);
+      result = await upstreamData(url, init, timeoutMs);
+    }
+  }
+  return upstreamResponse(result);
 }

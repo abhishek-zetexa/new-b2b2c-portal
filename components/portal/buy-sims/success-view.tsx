@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Icon } from "@/components/ui/icon";
-import { moneyAmount } from "@/lib/buy-sims";
+import { clearCheckout, moneyAmount } from "@/lib/buy-sims";
 import { notifyCart } from "@/lib/cart-bus";
 import { asList, asRecord, num, portalRequest, requestErrorMessage, text, type JsonRecord } from "@/lib/portal-fetch";
 import { fieldClass, ghostButton, primaryButton } from "@/components/portal/buy-sims/shared";
@@ -52,6 +52,7 @@ export function BuySuccessView() {
     try {
       const parsed = JSON.parse(raw) as JsonRecord;
       const payload = asRecord(parsed.payload) ?? parsed;
+      clearCheckout();
       const timer = window.setTimeout(() => {
         setOrder(payload);
         setMethod(text(parsed.method || payload.payment_method));

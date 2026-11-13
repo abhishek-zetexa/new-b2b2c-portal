@@ -146,7 +146,18 @@ export function checkoutId() {
 }
 
 export function setCheckoutId(id: string) {
-  if (id) sessionStorage.setItem("CheckoutId", id);
+  if (!id) return;
+  sessionStorage.setItem("CheckoutId", id);
+  sessionStorage.removeItem("checkout-reset");
+}
+
+export function clearAssignedCustomer() {
+  sessionStorage.removeItem("customer_id");
+  sessionStorage.removeItem("buy-sims-customer");
+}
+
+export function canRestoreCheckout() {
+  return sessionStorage.getItem("checkout-reset") !== "1" && !sessionStorage.getItem("buy-sims-order");
 }
 
 export function checkoutIdFromAdd(payload: unknown) {
@@ -160,8 +171,9 @@ export function checkoutPath(id = checkoutId()) {
 
 export function clearCheckout() {
   sessionStorage.removeItem("CheckoutId");
-  sessionStorage.removeItem("customer_id");
   sessionStorage.removeItem("isCartOpen");
+  clearAssignedCustomer();
+  sessionStorage.setItem("checkout-reset", "1");
 }
 
 function safeJson(raw: string) {

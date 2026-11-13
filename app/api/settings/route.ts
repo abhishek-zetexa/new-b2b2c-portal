@@ -1,5 +1,5 @@
 import { publicEnv } from "@/lib/public-env";
-import { upstream, upstreamData } from "@/lib/upstream";
+import { upstream, upstreamData, upstreamResponse } from "@/lib/upstream";
 
 function smtpUrl(resellerId: string) {
   return `${publicEnv.resellerBrandingPreference}api/v1/admin/internal/set-smtp-reseller?reseller_id=${encodeURIComponent(resellerId)}`;
@@ -83,7 +83,9 @@ export async function GET(request: Request) {
   }
   if (resource === "addons") {
     const query = new URLSearchParams({ reseller_id: resellerId, agent_id: agentId });
-    return upstream(`${publicEnv.invConfig}b2b-partner/airport-addons/get-settings?${query.toString()}`);
+    const result = await upstreamData(`${publicEnv.invConfig}b2b-partner/airport-addons/get-settings?${query.toString()}`);
+    if (result.status === 404) return Response.json({ success: true, data: [] });
+    return upstreamResponse(result);
   }
   return Response.json({ message: "Unknown settings resource." }, { status: 400 });
 }

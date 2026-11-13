@@ -416,6 +416,7 @@ export function MvnoCheckoutView({ packageId }: { packageId: string }) {
         payload: asRecord(result.data) ?? result,
       }));
       sessionStorage.removeItem("customer_id");
+      sessionStorage.removeItem("buy-sims-customer");
       toast.success(method === "wallet" ? "Order placed successfully!" : "Payment link created successfully!");
       router.push("/checkout/success");
     } catch (err) {

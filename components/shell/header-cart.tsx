@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePartner } from "@/components/shell/partner-context";
 import { CartDrawer } from "@/components/portal/buy-sims/plan-view";
 import { Icon } from "@/components/ui/icon";
-import { checkoutFrom, checkoutId, clearCheckout, setCheckoutId, type CheckoutView } from "@/lib/buy-sims";
+import { canRestoreCheckout, checkoutFrom, checkoutId, clearCheckout, setCheckoutId, type CheckoutView } from "@/lib/buy-sims";
 import { cartEvent, notifyCart, type CartNotice } from "@/lib/cart-bus";
 import { asList, asRecord, num, portalRequest, PortalRequestError, requestErrorMessage, text, type JsonRecord } from "@/lib/portal-fetch";
 
@@ -19,7 +19,7 @@ export function HeaderCart() {
   async function refreshCount() {
     try {
       let id = checkoutId();
-      if (!id && !sessionStorage.getItem("buy-sims-order")) {
+      if (!id && canRestoreCheckout()) {
         const last = await portalRequest<JsonRecord>("/api/buy-sims?resource=last-checkout");
         const data = asRecord(last.data);
         id = text(typeof last.data === "string" ? last.data : data?.checkout_id || data?.id);

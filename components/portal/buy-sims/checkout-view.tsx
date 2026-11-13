@@ -8,6 +8,7 @@ import { usePartner } from "@/components/shell/partner-context";
 import { hasPermission } from "@/lib/auth-session";
 import { ancillaryImage, checkoutIdFrom } from "@/lib/dashboard";
 import {
+  canRestoreCheckout,
   checkoutFrom,
   checkoutId,
   clearCheckout,
@@ -86,7 +87,7 @@ export function CheckoutView() {
     }
     const stored = checkoutId();
     if (stored) return stored;
-    if (sessionStorage.getItem("buy-sims-order")) return "";
+    if (!canRestoreCheckout()) return "";
     try {
       const last = await portalRequest<JsonRecord>("/api/buy-sims?resource=last-checkout");
       const recovered = checkoutIdFrom(last);
@@ -143,8 +144,13 @@ export function CheckoutView() {
         }
         clearCheckout();
         setCart(null);
+        setCustomer(null);
+        setAddresses([]);
+        setAddressId("");
+        setNationality(null);
         setId("");
         setCleared(true);
+        notifyCart({ close: true, lines: [] });
         return;
       }
       setCleared(false);
@@ -153,7 +159,7 @@ export function CheckoutView() {
         const next = { ...current };
         for (const line of view.lines) {
           next[line.lineId] = {
-            simType: line.simType || current[line.lineId]?.simType || "esim",
+            simType: line.simType === "psim" ? "psim" : current[line.lineId]?.simType || line.simType || "esim",
             delivery: current[line.lineId]?.delivery || "onspot",
             zip: line.zip || current[line.lineId]?.zip || "",
             date: line.journeyDate || current[line.lineId]?.date || "",
@@ -168,12 +174,14 @@ export function CheckoutView() {
         else toast.error(`Invalid coupon code "${couponCode}". Please try again.`);
       }
       const stored = sessionStorage.getItem("buy-sims-customer");
-      if (stored && view.customerId) {
-        const parsed = JSON.parse(stored) as CustomerRecord;
-        if (parsed.id === view.customerId) {
-          setCustomer(parsed);
-          await loadAddresses(parsed.id);
-        }
+      const parsed = stored ? JSON.parse(stored) as CustomerRecord : null;
+      if (parsed && view.customerId && parsed.id === view.customerId) {
+        setCustomer(parsed);
+        await loadAddresses(parsed.id);
+      } else {
+        setCustomer(null);
+        setAddresses([]);
+        setAddressId("");
       }
     } catch (err) {
       if (attempt < 1 && err instanceof PortalRequestError && err.status >= 500) {
@@ -495,9 +503,8 @@ export function CheckoutView() {
         payload: asRecord(result.data) ?? result,
       }));
       clearCheckout();
+      setCustomer(null);
       notifyCart({ close: true, lines: [] });
-      sessionStorage.removeItem("customer_id");
-      sessionStorage.removeItem("buy-sims-customer");
       toast.success("Order Successful");
       router.push("/checkout/success");
     } catch (err) {
@@ -573,8 +580,8 @@ export function CheckoutView() {
                 <select value={draft.simType} disabled={!line.psimAllowed && draft.simType === "esim"} onChange={(event) => {
                   const simType = event.target.value;
                   if (simType === "psim" && line.quantity !== 1) toast.error("For pSIM, quantity must be 1");
-                  setDrafts((current) => ({ ...current, [line.lineId]: { ...draft, simType } }));
-                  void updateLine(line, { sim_type: simType, iccid: simType === "esim" ? "" : line.iccid });
+                  setDrafts((current) => ({ ...current, [line.lineId]: { ...draft, simType, delivery: simType === "psim" ? draft.delivery : "onspot" } }));
+                  if (simType === "esim") void updateLine(line, { sim_type: "esim", iccid: "" });
                 }} className={`${fieldClass} mt-1`}>
                   <option value="esim">eSIM</option>
                   {line.psimAllowed ? <option value="psim">pSIM</option> : null}
