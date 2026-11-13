@@ -35,5 +35,7 @@ export async function postAuth<T>(url: string, body: unknown): Promise<{ ok: boo
 }
 
 export function authMessage(data: { message?: string } | null | undefined, fallback: string) {
-  return data?.message || fallback;
+  const message = data?.message?.trim() || "";
+  if (!message || /<[a-z!/]/i.test(message)) return fallback;
+  return message;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
 import { hasMenuFlag } from "@/lib/auth-session";
@@ -26,15 +26,29 @@ function NavLink({
   pathname: string;
   onNavigate: () => void;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(pathname.startsWith("/order-menu"));
   const childActive = item.children?.some((child) => pathname === child.href) ?? false;
-  const active = item.children ? childActive : isActive(pathname, item.href, true);
+  const active = item.children
+    ? childActive
+    : item.href === "/buy-sims"
+      ? pathname === "/buy-sims" || pathname.startsWith("/buy-sims/")
+      : isActive(pathname, item.href, true);
 
   if (!item.children) {
     return (
       <Link
         href={item.href}
-        onClick={onNavigate}
+        onClick={(event) => {
+          if (item.href === "/buy-sims") {
+            event.preventDefault();
+            sessionStorage.removeItem("istopup");
+            sessionStorage.removeItem("topupIccid");
+            const view = sessionStorage.getItem("buy-sims-view");
+            router.push(view === "list" ? "/buy-sims/list" : "/buy-sims");
+          }
+          onNavigate();
+        }}
         className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${active ? "bg-mint font-semibold text-primary" : "text-ink hover:bg-mint"
           }`}
       >

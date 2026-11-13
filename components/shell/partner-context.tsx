@@ -13,6 +13,8 @@ export type PartnerContextValue = {
   agentId: string;
   role: string;
   cashbackEligible: boolean;
+  voiceSmsPlans: boolean;
+  mvnoAccess: boolean;
   featureAccess: FeatureAccess;
   resellerStatus: string;
 };
@@ -26,6 +28,8 @@ const empty: PartnerContextValue = {
   agentId: "",
   role: "",
   cashbackEligible: false,
+  voiceSmsPlans: false,
+  mvnoAccess: false,
   featureAccess: {},
   resellerStatus: "",
 };
@@ -38,28 +42,29 @@ export function PartnerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let ignore = false;
     portalRequest<Omit<PartnerContextValue, "ready" | "resellerStatus">>("/api/account/context")
-      .then(async (partner) => {
-        let resellerStatus = "";
-        try {
-          const account = await portalRequest<Record<string, unknown>>("/api/developer?env=account");
-          const nested = account.data && typeof account.data === "object" ? (account.data as Record<string, unknown>) : null;
-          resellerStatus = String(account.kyc_status || nested?.kyc_status || "");
-          sessionStorage.setItem("resellerStatus", resellerStatus);
-        } catch {
-          resellerStatus = sessionStorage.getItem("resellerStatus") || "";
-        }
-        if (!ignore) {
-          sessionStorage.setItem("role", partner.role);
-          sessionStorage.setItem("agent-data", JSON.stringify({
-            reseller_id: partner.resellerId,
-            agent_id: partner.agentId,
-            first_name: partner.firstName,
-            email: partner.email,
-          }));
-          sessionStorage.setItem("featureAccess", JSON.stringify(partner.featureAccess));
-          sessionStorage.setItem("iscashbackEligible", partner.cashbackEligible ? "true" : "false");
-          setValue({ ...partner, resellerStatus, ready: true });
-        }
+      .then((partner) => {
+        if (ignore) return;
+        const resellerStatus = sessionStorage.getItem("resellerStatus") || "";
+        sessionStorage.setItem("role", partner.role);
+        sessionStorage.setItem("agent-data", JSON.stringify({
+          reseller_id: partner.resellerId,
+          agent_id: partner.agentId,
+          first_name: partner.firstName,
+          email: partner.email,
+          display_voice_sms_plans: partner.voiceSmsPlans,
+          mvno_access: partner.mvnoAccess,
+        }));
+        sessionStorage.setItem("featureAccess", JSON.stringify(partner.featureAccess));
+        sessionStorage.setItem("iscashbackEligible", partner.cashbackEligible ? "true" : "false");
+        setValue({ ...partner, resellerStatus, ready: true });
+        portalRequest<Record<string, unknown>>("/api/developer?env=account")
+          .then((account) => {
+            const nested = account.data && typeof account.data === "object" ? (account.data as Record<string, unknown>) : null;
+            const status = String(account.kyc_status || nested?.kyc_status || "");
+            sessionStorage.setItem("resellerStatus", status);
+            if (!ignore) setValue((current) => ({ ...current, resellerStatus: status }));
+          })
+          .catch(() => undefined);
       })
       .catch(() => {
         if (!ignore) setValue({ ...empty, ready: true });

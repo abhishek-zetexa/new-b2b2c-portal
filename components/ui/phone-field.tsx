@@ -33,6 +33,7 @@ type PhoneFieldProps = {
   placeholder?: string;
   countryIso2?: string;
   disabled?: boolean;
+  preferred?: CountryIso2[];
 };
 
 export function PhoneField({
@@ -46,6 +47,7 @@ export function PhoneField({
   placeholder = "Enter phone number",
   countryIso2,
   disabled,
+  preferred = preferredCountries,
 }: PhoneFieldProps) {
   const errorId = error ? `${id}-error` : undefined;
   const lastAppliedCountryRef = useRef<string>("");
@@ -68,7 +70,7 @@ export function PhoneField({
     value,
     forceDialCode: true,
     disableDialCodeAndPrefix: true,
-    preferredCountries,
+    preferredCountries: preferred,
     onChange: handlePhoneChange,
   });
 
@@ -100,7 +102,7 @@ export function PhoneField({
       <div className="react-international-phone-input-container">
         <CountrySelector
           selectedCountry={country.iso2}
-          preferredCountries={preferredCountries}
+          preferredCountries={preferred}
           disabled={disabled}
           onSelect={handleCountrySelect}
           renderButtonWrapper={({ rootProps }) => {

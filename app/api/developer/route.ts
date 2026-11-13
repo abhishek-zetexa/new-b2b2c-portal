@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     return upstream(`${publicEnv.custConfig}reseller/profileInfo`);
   }
   if (env === "account") {
-    return upstream(`${publicEnv.custUrl}api/v2/reseller-dashboard-details`);
+    return upstream(`${publicEnv.custUrl}api/v2/reseller-dashboard-details`, {}, 8000);
   }
   return upstream(`${publicEnv.custConfig}b2b/developer-info`);
 }

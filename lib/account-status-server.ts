@@ -15,7 +15,7 @@ export async function readAccountStatus(role: string) {
         AccessToken: tokens.apiKey,
       },
       cache: "no-store",
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(2000),
     });
     if (!response.ok) return null;
     return parseAccountStatus(await response.json(), role);

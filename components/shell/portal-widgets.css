@@ -20,6 +20,12 @@ body {
   top: 0 !important;
 }
 
+/* A closed Chatwoot holder stays on screen and swallows scroll and clicks. */
+.woot-widget-holder.woot--hide {
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 /* Harmonize Chatwoot's floating chat window with the portal surface. */
 @media (min-width: 668px) {
   .woot-widget-holder {

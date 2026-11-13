@@ -6,6 +6,7 @@ import { useState } from "react";
 import { endSession } from "@/lib/auth-client";
 import type { AccountStatus } from "@/lib/account-status";
 import { accountNav, findNavItem } from "@/lib/navigation";
+import { HeaderCart } from "@/components/shell/header-cart";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { Icon } from "@/components/ui/icon";
 
@@ -31,7 +32,7 @@ export function PortalHeader({
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-[var(--header-h)] items-center gap-3 border-b border-line bg-surface px-3 shadow-[0_10px_30px_color-mix(in_srgb,var(--navy)_6%,transparent)] sm:px-5">
+    <header className="z-30 flex h-[var(--header-h)] shrink-0 items-center gap-3 border-b border-line bg-surface px-3 shadow-[0_10px_30px_color-mix(in_srgb,var(--navy)_6%,transparent)] sm:px-5">
       <button
         type="button"
         className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line lg:hidden"
@@ -108,6 +109,7 @@ export function PortalHeader({
             </Link>
           );
         })}
+        <HeaderCart />
         <ThemeToggle />
         <button
           type="button"

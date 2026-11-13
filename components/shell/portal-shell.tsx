@@ -32,7 +32,7 @@ export function PortalShell({
   return (
     <ToastProvider>
       <PartnerProvider>
-        <div className="min-h-dvh bg-page">
+        <div className="h-dvh overflow-hidden bg-page">
           <GoogleTranslateEngine language={language} onSyncLanguage={setLanguage} />
           <Sidebar
             name={name || "Partner"}
@@ -44,13 +44,13 @@ export function PortalShell({
             onVerify={() => setEkycOpen(true)}
             onNavigate={() => setOpen(false)}
           />
-          <div className="min-w-0 lg:pl-[var(--sidebar-w)]">
+          <div className="flex h-dvh min-w-0 flex-col lg:pl-[var(--sidebar-w)]">
             <PortalHeader
               onMenu={() => setOpen(true)}
               status={status}
               onVerify={() => setEkycOpen(true)}
             />
-            <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</main>
+            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:px-8">{children}</main>
           </div>
           <EkycDialog open={ekycOpen} onClose={closeEkyc} />
           <ChatwootWidget

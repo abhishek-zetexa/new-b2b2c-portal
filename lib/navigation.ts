@@ -18,7 +18,7 @@ export const portalNav: NavGroup[] = [
     items: [
       { label: "Dashboard", href: "/dashboard", icon: "grid" },
       { label: "Products", href: "/products", icon: "box" },
-      { label: "Buy SIMs", href: "/buy-sims", icon: "sim" },
+      { label: "Buy SIMs", href: "/buy-sims", icon: "sim", flag: "BuySimFlow" },
       { label: "Buy Addons Service", href: "/buy-airport-service", icon: "plane" },
       {
         label: "Orders",
